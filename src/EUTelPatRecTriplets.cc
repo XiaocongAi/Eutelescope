@@ -360,7 +360,7 @@ bool EUTelPatRecTriplets::getDoubHitOnTraj(doublets const& doub, std::vector<uns
         streamlog_out(DEBUG1) << "PASS Doublet cut!! " << distBest <<"<"<< _dutDistCut << std::endl;
         newHits.push_back(hitBest);
     }
-    if(newHits.size() < hitNum){
+    if(newHits.size() < hitNum){ //newHits.size() can be 0, 1, 2
         return false;
     //    std::cout<<"Fail number of hits "  << std::endl;
 
@@ -427,6 +427,7 @@ std::vector<EUTelTrack> EUTelPatRecTriplets::getMinFakeTracks(){
             for(size_t i = 0 ; i < EUTelExcludedPlanes::_senInc.size(); ++i){
                 if(EUTelExcludedPlanes::_senInc.at(i) > 5){
                     dut.push_back(EUTelExcludedPlanes::_senInc.at(i));
+                    //streamlog_out(MESSAGE5)<<"dut = "<<EUTelExcludedPlanes::_senInc.at(i)<<std::endl;
                 }
             }
             streamlog_out(DEBUG1) << "Got hit! "  << std::endl;
@@ -435,6 +436,7 @@ std::vector<EUTelTrack> EUTelPatRecTriplets::getMinFakeTracks(){
       //      if(!pass){
       //          continue;
        //     }
+            //streamlog_out(MESSAGE5)<<"nDUTs = "<<dut.size()<<" good DUT hits = "<<newHits.size()<<std::endl;
             tracksAndDUTHits.push_back(make_pair(*itTrack,newHits));
         }
     }

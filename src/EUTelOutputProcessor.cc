@@ -96,9 +96,12 @@ void EUTelOutputProcessor::init() {
 
 
 void EUTelOutputProcessor::processRunHeader( LCRunHeader* run) { 
-  std::unique_ptr<EUTelRunHeaderImpl> runHeader = std::make_unique<EUTelRunHeaderImpl>(run);
-  runHeader->addProcessor(type());
+
+  auto_ptr<EUTelRunHeaderImpl> runHeader ( new EUTelRunHeaderImpl( run ) ) ;
+  runHeader->addProcessor( type() );
+
   LCIOOutputProcessor::processRunHeader(run);
+
 } 
 
 void EUTelOutputProcessor::processEvent( LCEvent * evt ) { 

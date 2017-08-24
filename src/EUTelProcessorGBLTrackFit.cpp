@@ -98,7 +98,7 @@ void EUTelProcessorGBLTrackFit::init() {
 		EUTelGBLFitter* Fitter = new EUTelGBLFitter();
 		Fitter->setBeamEnergy(_eBeam);
 		Fitter->setMode(_mode);
-        Fitter->setIncMed(_incMed); 
+                Fitter->setIncMed(_incMed); 
 		Fitter->setMEstimatorType(_mEstimatorType);//As said before this is to do with how we deal with outliers and the function we use to weight them.
 		Fitter->setParamterIdXResolutionVec(_SteeringxResolutions);
 		Fitter->setParamterIdYResolutionVec(_SteeringyResolutions);
@@ -134,7 +134,7 @@ void EUTelProcessorGBLTrackFit::processRunHeader(LCRunHeader * run) {
 void EUTelProcessorGBLTrackFit::processEvent(LCEvent* evt){
 	try{
 		streamlog_out(DEBUG5) << "Start of event " << _nProcessedEvents << std::endl;
-
+                
 		EUTelEventImpl * event = static_cast<EUTelEventImpl*> (evt); ///We change the class so we can use EUTelescope functions
 
 		if (event->getEventType() == kEORE) {
@@ -145,11 +145,11 @@ void EUTelProcessorGBLTrackFit::processEvent(LCEvent* evt){
 		}
         EUTelReaderGenericLCIO reader = EUTelReaderGenericLCIO();
         std::vector<EUTelTrack> tracks = reader.getTracks(evt, _trackCandidatesInputCollectionName );
-		std::vector<EUTelTrack> allTracksForThisEvent;//GBL will analysis the track one at a time. However we want to save to lcio per event.
-		for (size_t iTrack = 0; iTrack < tracks.size(); iTrack++) {
+        std::vector<EUTelTrack> allTracksForThisEvent;//GBL will analysis the track one at a time. However we want to save to lcio per event.
+	for (size_t iTrack = 0; iTrack < tracks.size(); iTrack++) {
             _nTrackCand++;
 			EUTelTrack track = tracks.at(iTrack); 
-            streamlog_out(DEBUG1)<<"Found "<<tracks.size()<<" tracks for event " << evt->getEventNumber() << "  This is track:  " << iTrack <<std::endl;
+            //streamlog_out(MESSAGE5)<<"Found "<<tracks.size()<<" tracks for event " << evt->getEventNumber() << "  This is track:  " << iTrack <<std::endl;
             track.print();
 			streamlog_out(DEBUG1) << "//////////////////////////////////// " << std::endl;
 			_trackFitter->testTrack(track);  
@@ -169,7 +169,7 @@ void EUTelProcessorGBLTrackFit::processEvent(LCEvent* evt){
             }catch(std::string &e){
                 continue;
             }
-			const gear::BField& B = geo::gGeometry().getMagneticField();//We need this to determine if we should fit a curve or a straight line.
+		        const gear::BField& B = geo::gGeometry().getMagneticField();//We need this to determine if we should fit a curve or a straight line.
 			const double Bmag = B.at( TVector3(0.,0.,0.) ).r2();
 			gbl::GblTrajectory* traj = 0;
 			if ( Bmag < 1.E-6 ) {
@@ -188,7 +188,7 @@ void EUTelProcessorGBLTrackFit::processEvent(LCEvent* evt){
 				static_cast < AIDA::IHistogram1D* > ( _aidaHistoMap1D[ _histName::_fitsuccessHistName ] ) -> fill(1.0);
 				if(chi2 ==0 or ndf ==0){
 					throw(std::string("Your fitted track has zero degrees of freedom or a chi2 of 0.")); 	
-                }
+                                }
 				track.setChi2(chi2);
 				track.setNdf(ndf);
 				_chi2NdfVec.push_back(chi2/static_cast<float>(ndf));
@@ -199,6 +199,7 @@ void EUTelProcessorGBLTrackFit::processEvent(LCEvent* evt){
 				std::map< int, std::map< float, float > >  SensorResidualError; 
                 ///Here collect the residuals and calcuated errors.
 				_trackFitter->getResLoc(traj,track, pointList, SensorResidual, SensorResidualError);
+         
 				if(chi2/static_cast<float>(ndf) < _chi2Cut){
 				  plotResidual(SensorResidual,SensorResidualError);
 				}
@@ -207,14 +208,15 @@ void EUTelProcessorGBLTrackFit::processEvent(LCEvent* evt){
 				static_cast < AIDA::IHistogram1D* > ( _aidaHistoMap1D[ _histName::_fitsuccessHistName ] ) -> fill(0.0);
 				continue;//We continue so we don't add an empty track
 			}	
-            if(chi2/static_cast<float>(ndf) < _chi2Cut){
-                allTracksForThisEvent.push_back(track);
-            }
-			}//END OF LOOP FOR ALL TRACKS IN AN EVENT
-			outputLCIO(evt, allTracksForThisEvent); 
-			allTracksForThisEvent.clear();//We clear this so we don't add the same track twice
-			streamlog_out(DEBUG5) << "End of event " << _nProcessedEvents << std::endl;
-			_nProcessedEvents++;
+          	        if(chi2/static_cast<float>(ndf) < _chi2Cut){
+          	            allTracksForThisEvent.push_back(track);
+                            std::cout<<"found track for evt"<<evt->getEventNumber() <<"and itrack ="<<iTrack<<" with chi2/ndf = "<<chi2/static_cast<float>(ndf)<<" and ierr = "<<ierr<<std::endl;
+          	        }
+	  }//END OF LOOP FOR ALL TRACKS IN AN EVENT
+	outputLCIO(evt, allTracksForThisEvent); 
+	allTracksForThisEvent.clear();//We clear this so we don't add the same track twice
+	streamlog_out(DEBUG5) << "End of event " << _nProcessedEvents << std::endl;
+	_nProcessedEvents++;
 	}
 	catch (DataNotAvailableException e) {
 		streamlog_out(MESSAGE0) << _trackCandidatesInputCollectionName << " collection not available" << std::endl;
@@ -268,6 +270,7 @@ void EUTelProcessorGBLTrackFit::plotResidual(std::map< int, std::map<float, floa
 	  std::map<float, float> map = sensor_residual_it->second;
 	  if( !map.empty()){
 	    float res = map.begin()->first;
+            std::cout<<" sensor_residual for planeID = "<< sensor_residual_it->first <<std::endl;
 	    if( sensor_residual_it->first == 0 ){static_cast < AIDA::IHistogram1D* > ( _aidaHistoMap1D[ _histName::_residGblFitHistNameX0 ] ) -> fill(res);}
 	    if( sensor_residual_it->first == 1 ){static_cast < AIDA::IHistogram1D* > ( _aidaHistoMap1D[ _histName::_residGblFitHistNameX1 ] ) -> fill(res);}
 	    if( sensor_residual_it->first == 2 ){static_cast < AIDA::IHistogram1D* > ( _aidaHistoMap1D[ _histName::_residGblFitHistNameX2 ] ) -> fill(res);}

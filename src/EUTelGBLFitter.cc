@@ -107,6 +107,7 @@ namespace eutelescope {
 		meas[0] = state.getHit().getPosition()[0] - state.getPosition()[0];
 		meas[1] = state.getHit().getPosition()[1] - state.getPosition()[1];
 
+	        // streamlog_out(MESSAGE5) <<"Hit position for plane "<<state.getLocation()<<" is " << state.getHit().getPosition()[0]<<", "<<state.getHit().getPosition()[1] <<std::endl;
                 setMeasurementCov(state);
                 double cov[4];
                 state.getHit().getCov(cov);
@@ -120,7 +121,7 @@ namespace eutelescope {
                        //double ang_pred = atan((predPosLocal[1] - Fypos)/(predPosLocal[0] - Fxpos ));
                        //double  r_pred =  sqrt((predPosLocal[0] - Fxpos )*(predPosLocal[0] - Fxpos) + (predPosLocal[1] - Fypos)*(predPosLocal[1]     - Fypos));
 
-		        //streamlog_out(DEBUG0) <<"Hit position is " << state.getHit().getPosition()[0]<<", "<<state.getHit().getPosition()[1] <<"r = "<<r_meas<<" with cosang = "<<cos(ang_meas)<<" sinang = "<<sin(ang_meas)<<"res is "<<meas[0]<<"   "<<meas[1]<<std::endl;
+		        //streamlog_out(MESSAGE5) <<"Hit position for plane "<<state.getLocation()<<" is " << state.getHit().getPosition()[0]<<", "<<state.getHit().getPosition()[1] <<"r = "<<r_meas<<" with cosang = "<<cos(ang_meas)<<" sinang = "<<sin(ang_meas)<<"res is "<<meas[0]<<"   "<<meas[1]<<std::endl;
                        //streamlog_out(DEBUG0)<<(cov[0]*cos(ang_meas)*cos(ang_meas) + cov[3]*r_meas*r_meas*sin(ang_meas)*sin(ang_meas))<<",  "<<((cov[0]-cov[3]*r_meas*r_meas)*sin(ang_meas)*cos(ang_meas))<<",  "<<(cov[0]*sin(ang_meas)*sin(ang_meas) + cov[3]*r_meas*r_meas*cos(ang_meas)*cos(ang_meas))<<std::endl; 
                        TMatrixDSym covxy(2);
                        //covxy[0][0] = cov[0]*cos(ang_meas)*cos(ang_meas) + cov[3]*sin(ang_meas)*sin(ang_meas);
@@ -451,7 +452,7 @@ namespace eutelescope {
             TVectorD aResErrors(2);
             TVectorD aDownWeights(2); 
             traj->getMeasResults(itSt->GBLLabels.at(0), numData, aResiduals, aMeasErrors, aResErrors, aDownWeights);
-          //  streamlog_out(MESSAGE5) <<"State location: "<<itSt->getLocation()<<" The residual x " <<aResiduals[0]<<" The residual y " <<aResiduals[1]<<std::endl;
+            //streamlog_out(MESSAGE5) <<"State location: "<<itSt->getLocation()<<" The residual x " <<aResiduals[0]<<" The residual y " <<aResiduals[1]<<std::endl;
             std::map<float, float> res;  
             res.insert(std::make_pair(aResiduals[0],aResiduals[1]));
             SensorResidual.insert(std::make_pair(itSt->getLocation(), res));		
