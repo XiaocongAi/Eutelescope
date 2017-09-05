@@ -359,6 +359,8 @@ void EUTelProcessorGeometricClustering::geometricClustering(LCEvent * evt, LCCol
 		
 		std::vector<EUTelGeometricPixel> newlyAdded;
 		//We now cluster those hits together
+                //calculate how many clusters can be found
+                int ncluster=0;
 		while( !hitPixelVec.empty() )
 		{
 		    // prepare a TrackerData to store the cluster candidate
@@ -453,7 +455,7 @@ void EUTelProcessorGeometricClustering::geometricClustering(LCEvent * evt, LCCol
 			
 			// last but not least increment the totClusterMap
 			_totClusterMap[ sensorID ] += 1;
-			
+		        ncluster++;	
 		      } //cluster processing if
 		    
 		    else 
@@ -461,8 +463,8 @@ void EUTelProcessorGeometricClustering::geometricClustering(LCEvent * evt, LCCol
 			//in the case the cluster candidate is not passing the threshold ...
 			//forget about them, the memory should be automatically cleaned by smart ptr's
 		      }
-		  } //loop over all found clusters
-		
+		  } //loop over all found pixels 
+//		streamlog_out(MESSAGE5)<<"event = "<<evt->getEventNumber()<< " have ncluster " <<ncluster<<" on sensoer ID = "<<sensorID<<std::endl;
 		delete pixel;
 		
 	} // this is the end of the loop over all ZS detectors
@@ -493,7 +495,7 @@ void EUTelProcessorGeometricClustering::end() {
 	std::map<int,int>::iterator iter = _totClusterMap.begin();
 	while( iter != _totClusterMap.end() )
 	{
-		streamlog_out ( MESSAGE4 ) << "Found " << iter->second << " clusters on detector " << iter->first << std::endl;
+		//streamlog_out ( MESSAGE5 ) << "Found " << iter->second << " clusters on detector " << iter->first << std::endl;
 		++iter;
 	}
 }

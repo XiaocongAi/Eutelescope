@@ -248,8 +248,9 @@ void EUTelProcessorPatRecTriplets::plotHistos( std::vector<EUTelTrack>& trackCan
  
 	static_cast < AIDA::IHistogram1D* > ( _aidaHistoMap1D[ _histName::_numberTracksCandidatesHistName ] ) -> fill( nTracks );
 	streamlog_out( MESSAGE2 ) << "Event #" << _nProcessedEvents << std::endl;
-	int numberOfHits =0;
+	//int numberOfHits =0;
 	for (size_t i = 0; i< trackCandidates.size( ) ; ++i ) {//loop over all tracks
+	int numberOfHits =0;
 		for(size_t j = 0; j <trackCandidates[i].getStates().size(); ++j){//loop over all states 
 			if(!trackCandidates[i].getStates()[j].getStateHasHit()){//We only ever store on hit per state
 				continue;
@@ -260,6 +261,7 @@ void EUTelProcessorPatRecTriplets::plotHistos( std::vector<EUTelTrack>& trackCan
 			//static_cast < AIDA::IHistogram1D* > ( _aidaHistoMap1D[ _histName::_HitOnTrackTimeHistName ] ) -> fill(trackCandidates[i].getStates()[j].getHit().getTime()  );
 		}
 		streamlog_out( MESSAGE1 ) << "Track hits end:==============" << std::endl;
+	//	streamlog_out( MESSAGE5 ) << "number of hits for the track is " <<numberOfHits<< std::endl;
 		}
 }
 

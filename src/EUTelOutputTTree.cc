@@ -219,6 +219,7 @@ public:
     m_tree->Branch("theta", &m_theta);
 
     m_tree->Branch("event_nr", &m_event_nr);
+    m_tree->Branch("TDC", &m_ptdc);
   }
   static bool hasCollection(EVENT::LCEvent* evt){
 
@@ -238,7 +239,8 @@ public:
     try{
         std::vector<EUTelTrack> tr = lc_reader.getTracks(ev, "tracks");
 //        std::cout<< "Track size: " <<tr.size() << std::endl;
-
+        TString strptdc=(ev->getParameters()).getStringVal("PTDC.BIT");
+        m_ptdc=strptdc.Atoi();
         for (size_t i = 0; i < tr.size();++i)
         {
           tr[i].print();
@@ -330,6 +332,7 @@ public:
   std::string m_name, m_type;
   std::vector<double> m_x, m_y, m_id,
     m_chi2,m_ndf,m_phi,m_theta;
+  int m_ptdc;
 };
 
 

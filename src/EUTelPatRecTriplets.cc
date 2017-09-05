@@ -385,6 +385,7 @@ float EUTelPatRecTriplets::getDistLocal(std::vector<EUTelHit>::iterator itHit, s
     Eigen::Vector3d local;
     local = rotInv*diff;
 
+
     if(_planeDimensions[itHit->getLocation()] == 2){ 
         streamlog_out(DEBUG0) <<"Pixel:  X delta: " << fabs(local[0]) << " Y delta: " << fabs(local[1]) << std::endl;
         dist = sqrt(pow(local[0],2)+pow(local[1],2));
@@ -393,7 +394,20 @@ float EUTelPatRecTriplets::getDistLocal(std::vector<EUTelHit>::iterator itHit, s
         {
             streamlog_out(DEBUG0) << "Strip: " <<"X delta: " << fabs(local[0]) << std::endl;
             /////Keep it positive, the distance that is!!!
-            dist = sqrt(pow(local[0],2));
+//====================the dist for R0 strips should be based on the angle difference===========================
+            double Fxpos=geo::gGeometry()._R0para.Fx ;
+            double Fypos=geo::gGeometry()._R0para.Fy ;
+             
+            double  measL[3] =  {itHit->getPosition()[0], itHit->getPosition()[1], itHit->getPosition()[2]};
+            double  preL[3] = {itHit->getPosition()[0] + local[0], itHit->getPosition()[1]+ local[1], itHit->getPosition()[2]+ local[2]}; 
+
+            double ang_meas = atan2(measL[1] - Fypos,measL[0] - Fxpos);
+            double ang_pre = atan2(preL[1] - Fypos,preL[0] - Fxpos);
+            double r_meas =  sqrt((measL[0] - Fxpos )*(measL[0] - Fxpos) + (measL[1] - Fypos)*(measL[1]  - Fypos));
+            dist  =  sqrt(pow(ang_pre - ang_meas,2))*r_meas; 
+//============================================================================================================
+
+    //        dist = sqrt(pow(local[0],2));
         }else if(_dutDirection==1){ 
             streamlog_out(DEBUG0) << "Strip: " <<"Y delta: " << fabs(local[1]) << std::endl;
             ///Keep it positive, the distance that is!!!

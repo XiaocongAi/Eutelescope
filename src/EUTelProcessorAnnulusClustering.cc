@@ -431,6 +431,7 @@ void EUTelProcessorAnnulusClustering::geometricClustering(LCEvent * evt, LCColle
 			}		
                                 streamlog_out(DEBUG2)<<"size of hitpixel for sensor "<<sensorID<<" is "<<hitPixelVec.size()<<std::endl;
 
+                                int ncluster=0;
                                 std::vector<EUTelAnnulusPixel> newlyAdded;
 		        	//We now cluster those hits together
 			        while( !hitPixelVec.empty() )
@@ -531,7 +532,7 @@ void EUTelProcessorAnnulusClustering::geometricClustering(LCEvent * evt, LCColle
 
 			        		// last but not least increment the totClusterMap
 			        		_totClusterMap[ sensorID ] += 1;
-
+                                                ncluster++;
 			        	} //cluster processing if
 
 			        	else 
@@ -541,6 +542,7 @@ void EUTelProcessorAnnulusClustering::geometricClustering(LCEvent * evt, LCColle
 			        	}
 			        } //loop over all found clusters
 
+              //   streamlog_out(MESSAGE5)<<"event = "<<evt->getEventNumber()<< " have ncluster " <<ncluster<<" on sensoer ID = "<<sensorID<<std::endl;
 
 			delete genericPixel;
     		}	 
@@ -576,7 +578,7 @@ void EUTelProcessorAnnulusClustering::end() {
 	std::map<int,int>::iterator iter = _totClusterMap.begin();
 	while( iter != _totClusterMap.end() )
 	{
-		streamlog_out ( MESSAGE4 ) << "Found " << iter->second << " clusters on detector " << iter->first << std::endl;
+//		streamlog_out ( MESSAGE5 ) << "Found " << iter->second << " clusters on detector " << iter->first << std::endl;
 		++iter;
 	}
 }
