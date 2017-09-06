@@ -35,31 +35,53 @@ AnnulusStripGeoDescr::AnnulusStripGeoDescr( int xPixel, int yPixel, double xSize
       rowstrip = _tGeoManager->MakeTubs( "sensarea_strip" , Si, rmin, rmax, zSize/2, 90+(-pitchPhi/2)*deg,90+(pitchPhi/2)*deg);
 
       //The formula used for calculating strip position is defined in the ATLAS12EC Technical Specs
-      //theta=pitchPhi*((xPixel-1)/2.0-0.5)+stereoAngle+PI/2;
       theta=pitchPhi*((xPixel-1)/2.0-0.5)+stereoAngle+PI/2;  
 
+    
+      if(xPixel<1090){  
       //placement of first two rows
-      for( int i = xPixel-1; i >=0; i-- ){
-        TGeoCombiTrans* transform=new TGeoCombiTrans(0,0,0,new TGeoRotation("rot",0,0,0));
-        //get position of each strip for first row
-        //phi_i=(i-(xPixel-1)/2.0)*pitchPhi;
-        phi_i=(i -(xPixel-1)/2.0)*pitchPhi;  
-        b=-2*(2*rCentre*sin(stereoAngle/2))*sin(stereoAngle/2+phi_i);
-        c=pow((2*rCentre*sin(stereoAngle/2)),2)-pow(rmin,2);
-        r=0.5*(-b+sqrt(pow(b,2)-4*c));
-        y=r*cos(phi_i+stereoAngle) - rCentre*cos(stereoAngle);
-        x=-r*sin(phi_i+stereoAngle) + rCentre*sin(stereoAngle);
-        //create first transform
-        //rotate to get correct angle of strip
-        transform->RotateZ(theta*deg-90);
-        transform->SetTranslation(x-rmin*cos(theta),y-rmin*sin(theta),0);  //The R0 center has the coordinate (0, 0)
-        //add the nodes
-        plane->AddNode(rowstrip,i+1,transform);
-        //get angle of next strip
-        theta-=pitchPhi;
+        for( int i = xPixel-1; i >=0; i-- ){
+          TGeoCombiTrans* transform=new TGeoCombiTrans(0,0,0,new TGeoRotation("rot",0,0,0));
+          //get position of each strip for first row
+          phi_i=(i -(xPixel-1)/2.0)*pitchPhi;  
+          b=-2*(2*rCentre*sin(stereoAngle/2))*sin(stereoAngle/2+phi_i);
+          c=pow((2*rCentre*sin(stereoAngle/2)),2)-pow(rmin,2);
+          r=0.5*(-b+sqrt(pow(b,2)-4*c));
+          y=r*cos(phi_i+stereoAngle) - rCentre*cos(stereoAngle);
+          x=-r*sin(phi_i+stereoAngle) + rCentre*sin(stereoAngle);
+          //create first transform
+          //rotate to get correct angle of strip
+          transform->RotateZ(theta*deg-90);
+          transform->SetTranslation(x-rmin*cos(theta),y-rmin*sin(theta),0);  //The R0 center has the coordinate (0, 0)
+          //add the nodes
+          plane->AddNode(rowstrip,i+1,transform);
+          //get angle of next strip
+          theta-=pitchPhi;
+       }
       }
+      else{
+      //placement of last two rows
+       for( int i = 0; i <=xPixel-1; i++ ){
+          TGeoCombiTrans* transform=new TGeoCombiTrans(0,0,0,new TGeoRotation("rot",0,0,0));
+          //get position of each strip for second row
+          phi_i=((xPixel -1 - i) - (xPixel-1)/2.0)*pitchPhi;  
+          b=-2*(2*rCentre*sin(stereoAngle/2))*sin(stereoAngle/2+phi_i);
+          c=pow((2*rCentre*sin(stereoAngle/2)),2)-pow(rmin,2);
+          r=0.5*(-b+sqrt(pow(b,2)-4*c));
+          y=r*cos(phi_i+stereoAngle) - rCentre*cos(stereoAngle);
+          x=-r*sin(phi_i+stereoAngle) + rCentre*sin(stereoAngle);
+          //create first transform
+          //rotate to get correct angle of strip
+          transform->RotateZ(theta*deg-90);
+          transform->SetTranslation(x-rmin*cos(theta),y-rmin*sin(theta),0);  //The R0 center has the coordinate (0, 0)
+          //add the nodes
+          plane->AddNode(rowstrip,i+1,transform);
+          //get angle of next strip
+          theta-=pitchPhi;
+       }
  
- 
+      }
+
     }
   
     AnnulusStripGeoDescr::~ AnnulusStripGeoDescr()
