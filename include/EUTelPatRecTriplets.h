@@ -71,7 +71,7 @@ namespace eutelescope {
     EUTelPatRecTriplets(AIDA::IHistogram1D * _DoubletXseperationHistoRight, AIDA::IHistogram1D * _DoubletYseperationHistoRight, AIDA::IHistogram1D * _DoubletXseperationHistoLeft,
 				    AIDA::IHistogram1D * _DoubletYseperationHistoLeft, AIDA::IHistogram1D * _TripletXseperationHistoRight, AIDA::IHistogram1D * _TripletYseperationHistoRight, 
 				    AIDA::IHistogram1D * _TripletXseperationHistoLeft, AIDA::IHistogram1D * _TripletYseperationHistoLeft, AIDA::IHistogram1D * _TripletDistCutXHisto,
-				    AIDA::IHistogram1D *_TripletDistCutYHisto, AIDA::IHistogram1D * TripletSlopeHistoX ,AIDA::IHistogram1D * TripletSlopeHistoY, AIDA::IHistogram1D * DUTWindowHisto);
+				    AIDA::IHistogram1D *_TripletDistCutYHisto, AIDA::IHistogram1D * TripletSlopeHistoX ,AIDA::IHistogram1D * TripletSlopeHistoY, AIDA::IHistogram1D * DUTWindowHisto, AIDA::IHistogram1D * DUTRadialWindowHisto);
 
     //! Struct object 
     /*! This contains the informtion needed to construct a track from two hits. 
@@ -152,6 +152,7 @@ namespace eutelescope {
         this->_hitNum = hitNum;
     }
     void setDUTCut(double cut){_dutDistCut = cut;}
+    void setDUTRadialCut(double cut){_dutRadialDistCut = cut;}
 
     //get public
     
@@ -279,6 +280,7 @@ namespace eutelescope {
     AIDA::IHistogram1D * _TripletSlopeHistoX ;
     AIDA::IHistogram1D * _TripletSlopeHistoY ;
     AIDA::IHistogram1D * _DUTWindowHisto;
+    AIDA::IHistogram1D * _DUTRadialWindowHisto;
 
 
     DISALLOW_COPY_AND_ASSIGN(EUTelPatRecTriplets) // prevent users from making (default) copies of processors
@@ -308,7 +310,7 @@ namespace eutelescope {
     double _beamE;
     int _mode;
     int _hitNum;
-    double _dutDistCut;
+    double _dutDistCut, _dutRadialDistCut;
     public:
     unsigned int _numberOfTracksTotal;
     int _numberOfTracksDUTTotal;

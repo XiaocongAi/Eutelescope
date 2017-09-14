@@ -10,7 +10,7 @@ namespace eutelescope {
 EUTelPatRecTriplets::EUTelPatRecTriplets(AIDA::IHistogram1D * DoubletXseperationHistoRight, AIDA::IHistogram1D * DoubletYseperationHistoRight, AIDA::IHistogram1D * DoubletXseperationHistoLeft,
 					   AIDA::IHistogram1D * DoubletYseperationHistoLeft, AIDA::IHistogram1D * TripletXseperationHistoRight, AIDA::IHistogram1D * TripletYseperationHistoRight,
 					   AIDA::IHistogram1D * TripletXseperationHistoLeft, AIDA::IHistogram1D * TripletYseperationHistoLeft, AIDA::IHistogram1D * TripletDistCutXHisto,
-					   AIDA::IHistogram1D * TripletDistCutYHisto, AIDA::IHistogram1D * TripletSlopeHistoX, AIDA::IHistogram1D * TripletSlopeHistoY, AIDA::IHistogram1D * DUTWindowHisto ):  
+					   AIDA::IHistogram1D * TripletDistCutYHisto, AIDA::IHistogram1D * TripletSlopeHistoX, AIDA::IHistogram1D * TripletSlopeHistoY, AIDA::IHistogram1D * DUTWindowHisto,AIDA::IHistogram1D * DUTRadialWindowHisto ):  
 _eventNumber(0),
 _totalNumberOfHits(0),
 _numberTripletsLeft(0),
@@ -33,7 +33,8 @@ _TripletDistCutXHisto(TripletDistCutXHisto),
 _TripletDistCutYHisto(TripletDistCutYHisto),
 _TripletSlopeHistoX(TripletSlopeHistoX),
 _TripletSlopeHistoY(TripletSlopeHistoY),
-_DUTWindowHisto(DUTWindowHisto)
+_DUTWindowHisto(DUTWindowHisto),
+_DUTRadialWindowHisto(DUTRadialWindowHisto)
 {
     EUTelExcludedPlanes();
 
@@ -345,19 +346,38 @@ bool EUTelPatRecTriplets::getDoubHitOnTraj(doublets const& doub, std::vector<uns
         //        std::cout<<"DistBest " << distBest  << std::endl;
             }
             if(itHit == hits.end()-1){
+               if(_planeDimensions[*itID] == 2) 
                _DUTWindowHisto ->fill(distBest);
+               else
+                _DUTRadialWindowHisto ->fill(distBest);
+
             }
         }
 
-        if(distBest >  _dutDistCut){
-   //         std::cout<<"DistBest Fail!!!!! " << distBest  << std::endl;
-
-            streamlog_out(DEBUG1) << "Doublet cut!! " << distBest <<">"<< _dutDistCut<<std::endl;
-            continue;
+         if(_planeDimensions[*itID] == 2) {
+                if(distBest >  _dutDistCut){
+           //         std::cout<<"DistBest Fail!!!!! " << distBest  << std::endl;
+        
+                    streamlog_out(DEBUG1) << "Doublet cut on FEI4!! " << distBest <<">"<< _dutDistCut<<std::endl;
+                    continue;
+                }
+         }
+         else{
+               if(distBest >  _dutRadialDistCut){
+         //         std::cout<<"DistBest Fail!!!!! " << distBest  << std::endl;
+                  
+                  streamlog_out(DEBUG1) << "Doublet cut on Radial strips!! " << distBest <<">"<< _dutRadialDistCut<<std::endl;
+                  continue;
+              }
         }
     //    std::cout<<"Pass "  << std::endl;
 
-        streamlog_out(DEBUG1) << "PASS Doublet cut!! " << distBest <<"<"<< _dutDistCut << std::endl;
+        if(_planeDimensions[*itID] == 2) 
+          streamlog_out(DEBUG1) << "PASS Doublet cut on FEI4!! " << distBest <<"<"<< _dutDistCut << std::endl;
+        else
+          streamlog_out(DEBUG1) << "PASS Doublet cuti on Radial strips!! " << distBest <<"<"<< _dutRadialDistCut << std::endl;
+   
+
         newHits.push_back(hitBest);
     }
     if(newHits.size() < hitNum){ //newHits.size() can be 0, 1, 2
@@ -404,7 +424,7 @@ float EUTelPatRecTriplets::getDistLocal(std::vector<EUTelHit>::iterator itHit, s
             double ang_meas = atan2(measL[1] - Fypos,measL[0] - Fxpos);
             double ang_pre = atan2(preL[1] - Fypos,preL[0] - Fxpos);
             double r_meas =  sqrt((measL[0] - Fxpos )*(measL[0] - Fxpos) + (measL[1] - Fypos)*(measL[1]  - Fypos));
-            dist  =  sqrt(pow(ang_pre - ang_meas,2))*r_meas; 
+            dist  =  sqrt(pow(ang_pre - ang_meas,2)); 
 //============================================================================================================
 
     //        dist = sqrt(pow(local[0],2));

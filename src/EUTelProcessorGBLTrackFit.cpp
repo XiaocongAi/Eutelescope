@@ -210,7 +210,7 @@ void EUTelProcessorGBLTrackFit::processEvent(LCEvent* evt){
 			}	
           	        if(chi2/static_cast<float>(ndf) < _chi2Cut){
           	            allTracksForThisEvent.push_back(track);
-                            std::cout<<"found track for evt"<<evt->getEventNumber() <<"and itrack ="<<iTrack<<" with chi2/ndf = "<<chi2/static_cast<float>(ndf)<<" and ierr = "<<ierr<<std::endl;
+                           // std::cout<<"found track for evt"<<evt->getEventNumber() <<"and itrack ="<<iTrack<<" with chi2/ndf = "<<chi2/static_cast<float>(ndf)<<" and ierr = "<<ierr<<std::endl;
           	        }
 	  }//END OF LOOP FOR ALL TRACKS IN AN EVENT
 	outputLCIO(evt, allTracksForThisEvent); 
@@ -270,7 +270,7 @@ void EUTelProcessorGBLTrackFit::plotResidual(std::map< int, std::map<float, floa
 	  std::map<float, float> map = sensor_residual_it->second;
 	  if( !map.empty()){
 	    float res = map.begin()->first;
-            std::cout<<" sensor_residual for planeID = "<< sensor_residual_it->first <<std::endl;
+          //  std::cout<<" sensor_residual for planeID = "<< sensor_residual_it->first <<std::endl;
 	    if( sensor_residual_it->first == 0 ){static_cast < AIDA::IHistogram1D* > ( _aidaHistoMap1D[ _histName::_residGblFitHistNameX0 ] ) -> fill(res);}
 	    if( sensor_residual_it->first == 1 ){static_cast < AIDA::IHistogram1D* > ( _aidaHistoMap1D[ _histName::_residGblFitHistNameX1 ] ) -> fill(res);}
 	    if( sensor_residual_it->first == 2 ){static_cast < AIDA::IHistogram1D* > ( _aidaHistoMap1D[ _histName::_residGblFitHistNameX2 ] ) -> fill(res);}

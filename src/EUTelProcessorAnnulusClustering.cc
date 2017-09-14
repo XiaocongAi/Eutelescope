@@ -825,12 +825,12 @@ void EUTelProcessorAnnulusClustering::bookHistos() {
 
 
 		tempHistoName = _hitMapHistoName + "_d" + to_string( sensorID );
-		int     xBin = maxX - minX + 1;
+		int     xBin = maxX - minX + 1 + 256;
 		double  xMin = static_cast<double >( minX ) - 0.5 ;
-		double  xMax = static_cast<double >( maxX ) + 0.5;
+		double  xMax = static_cast<double >( maxX ) + 0.5 + 256;  //Account for two fake ASICs insterted by ITSDAQ
 		int     yBin = maxY - minY + 1;
 		double  yMin = static_cast<double >( minY ) - 0.5;
-		double  yMax = static_cast<double >( maxY ) + 0.5;
+		double  yMax = static_cast<double >( maxY ) + 1.5;    //Y index is always 1 for Strips
 		AIDA::IHistogram2D * hitMapHisto = AIDAProcessor::histogramFactory(this)->createHistogram2D( (basePath + tempHistoName).c_str(), xBin, xMin, xMax,yBin, yMin, yMax);
 		_hitMapHistos.insert(std::make_pair(sensorID, hitMapHisto));
 		hitMapHisto->setTitle("Pixel Index Hit Map;X Index [#];Y Index [#];Count [#]");

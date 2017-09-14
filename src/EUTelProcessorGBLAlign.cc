@@ -170,7 +170,7 @@ void EUTelProcessorGBLAlign::processEvent(LCEvent * evt){
                 _trackFitter->getGloPar(pointList,track); 
                 const gear::BField& B = geo::gGeometry().getMagneticField();
                 const double Bmag = B.at( TVector3(0.,0.,0.) ).r2();
-                gbl::GblTrajectory* traj = 0;
+               gbl::GblTrajectory* traj = 0;
 //					printPointsInformation(pointList);
                 if ( Bmag < 1.E-6 ) {
                     traj = new gbl::GblTrajectory( pointList, false ); //Must make sure this is not a memory leak
