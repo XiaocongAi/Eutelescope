@@ -121,7 +121,7 @@ namespace eutelescope {
                        //double ang_pred = atan((predPosLocal[1] - Fypos)/(predPosLocal[0] - Fxpos ));
                        //double  r_pred =  sqrt((predPosLocal[0] - Fxpos )*(predPosLocal[0] - Fxpos) + (predPosLocal[1] - Fypos)*(predPosLocal[1]     - Fypos));
 
-		       streamlog_out(MESSAGE5) <<"Hit position for plane "<<state.getLocation()<<" is " << state.getHit().getPosition()[0]<<", "<<state.getHit().getPosition()[1] <<"r = "<<r_meas<<" with cosang = "<<cos(ang_meas)<<" sinang = "<<sin(ang_meas)<<"res is "<<meas[0]<<"   "<<meas[1]<<std::endl;
+		       //streamlog_out(MESSAGE5) <<"Hit position for plane "<<state.getLocation()<<" is " << state.getHit().getPosition()[0]<<", "<<state.getHit().getPosition()[1] <<"r = "<<r_meas<<" with cosang = "<<cos(ang_meas)<<" sinang = "<<sin(ang_meas)<<"res is "<<meas[0]<<"   "<<meas[1]<<std::endl;
                        //streamlog_out(DEBUG0)<<(cov[0]*cos(ang_meas)*cos(ang_meas) + cov[3]*r_meas*r_meas*sin(ang_meas)*sin(ang_meas))<<",  "<<((cov[0]-cov[3]*r_meas*r_meas)*sin(ang_meas)*cos(ang_meas))<<",  "<<(cov[0]*sin(ang_meas)*sin(ang_meas) + cov[3]*r_meas*r_meas*cos(ang_meas)*cos(ang_meas))<<std::endl; 
                        TMatrixDSym covxy(2);
                        //covxy[0][0] = cov[0]*cos(ang_meas)*cos(ang_meas) + cov[3]*sin(ang_meas)*sin(ang_meas);
@@ -143,21 +143,21 @@ namespace eutelescope {
                         Precxy[1][1] = covxy[0][0]/deter;
                         //covxy.Print();
                         //std::cout<<"covxy[0][0] = "<<covxy[0][0]<<" covxy[0][1] = "<<covxy[0][1]<< " covxy[1][1] = "<<covxy[1][1]<<std::endl;
-                        std::cout<<"deter = "<<deter<<std::endl;
-                        Precxy.Print();    
+                        //std::cout<<"deter = "<<deter<<std::endl;
+                        //Precxy.Print();    
 
-                        TMatrixDSymEigen measEigen(Precxy);
-                        TMatrixD measTransformation(2,2);
+                        //TMatrixDSymEigen measEigen(Precxy);
+                        //TMatrixD measTransformation(2,2);
 
-                        measTransformation.ResizeTo(2,2);
-                        measTransformation = measEigen.GetEigenVectors();
-                        measTransformation.T();
-                        TVectorD transResiduals = measTransformation *meas;
-                        TVectorD transPrecision = measEigen.GetEigenValues();
-                        std::cout<<"MeasRes : "<<meas[0]<<" : "<<meas[1]<<" trans Res "<<transResiduals[0]<<" : "<<transResiduals[1]<<" with resolution "<<sqrt(1.0/transPrecision[0])<<" : "<<sqrt(1.0/transPrecision[1])<<std::endl; 
-                        std::cout<<"precision "<<transPrecision[0]<<" : "<<transPrecision[1]<<std::endl; 
-                        std::cout<<"measTransformation print"<<std::endl;
-                        measTransformation.Print();  
+                        //measTransformation.ResizeTo(2,2);
+                        //measTransformation = measEigen.GetEigenVectors();
+                        //measTransformation.T();
+                        //TVectorD transResiduals = measTransformation *meas;
+                        //TVectorD transPrecision = measEigen.GetEigenValues();
+                        //std::cout<<"MeasRes : "<<meas[0]<<" : "<<meas[1]<<" trans Res "<<transResiduals[0]<<" : "<<transResiduals[1]<<" with resolution "<<sqrt(1.0/transPrecision[0])<<" : "<<sqrt(1.0/transPrecision[1])<<std::endl; 
+                        //std::cout<<"precision "<<transPrecision[0]<<" : "<<transPrecision[1]<<std::endl; 
+                        //std::cout<<"measTransformation print"<<std::endl;
+                        //measTransformation.Print();  
 
                         point.addMeasurement(state.getProjectionMatrix(), meas, Precxy, 1);
 			streamlog_out(DEBUG4) << "This is what we add to the measured point" << std::endl;

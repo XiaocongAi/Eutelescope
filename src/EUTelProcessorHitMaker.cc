@@ -598,8 +598,8 @@ void EUTelProcessorHitMaker::bookHistos(int sensorID) {
 
   int xNBin =    2*geo::gGeometry().siPlaneXNpixels ( sensorID );
   int yNBin;
-  //if(sensorID>9&&sensorID<26) yNBin = 500;
-  //else 
+  if(sensorID>9&&sensorID<26) yNBin = 500;
+  else 
   yNBin = 2*geo::gGeometry().siPlaneYNpixels ( sensorID );
 
 
