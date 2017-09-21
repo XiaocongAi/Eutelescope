@@ -123,6 +123,7 @@ void EUTelProcessorNoisyPixelFinder::initializeHitMaps() {
 			//first the x-entries-vector
 			std::vector<std::vector<int>> hitVecP = std::vector<std::vector<int>>( thisSensor.sizeX + _XindexRangeOffset);
                         //std::cout<<"XindexRangeOffset = "<<_XindexRangeOffset<<std::endl;
+
 			//and the y-entries vector
 			for(auto& i: hitVecP) {
 				//resize it now
@@ -213,7 +214,7 @@ void EUTelProcessorNoisyPixelFinder::noisyPixelFinder(EUTelEventImpl* evt) {
 				int indexX = pixel->getXCoord() - currentSensor->offX;
 				int indexY = pixel->getYCoord() - currentSensor->offY;
 
-                                //streamlog_out (MESSAGE2) <<"indexX = "<<indexX<<" indexY = "<<indexY<<std::endl;
+                                streamlog_out (MESSAGE2) <<"indexX = "<<indexX<<" indexY = "<<indexY<<std::endl;
 				try {
 					//increment the hit counter for this pixel
 					(hitArray->at(indexX)).at(indexY)++;
