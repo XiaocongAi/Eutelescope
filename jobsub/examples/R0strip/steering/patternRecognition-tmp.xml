@@ -68,6 +68,7 @@ Version: $Id: align-tmp.xml,v 1.3 2009-05-19 18:01:01 bulgheroni Exp $
     <!--Input of Zero Suppressed data-->
     <parameter name="HitInputCollectionName" type="string" lcioInType="TrackerHit"> @HitInputCollectionName@ </parameter>
     <parameter name="DUTWindow" type="double"> @DUTWindow@ </parameter>
+    <parameter name="DUTRadialWindow" type="double"> @DUTRadialWindow@ </parameter>
     <!--Maximal number of missing hits on a track candidate-->
     <!--Maximal number of track candidates to be found in events-->
     <!--parameter name="MaxNTracksPerEvent" type="int">100 </parameter-->
