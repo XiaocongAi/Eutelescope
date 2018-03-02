@@ -122,7 +122,7 @@ namespace eutelescope {
         /// Measurement is added in local frame. Defined as a plane in the GBL fit which contains only position information. 
         /// The projection matrix which is 5x5 is defined as the transform from the global to local frame. 
         /// The last zero is the minimum precision before this is set to 0. TO DO:Remove this magic number
-		point.addMeasurement(state.getProjectionMatrix(), meas, measPrec, 0);
+		point.addMeasurement(state.getProjectionMatrix(), meas, measPrec, 1);
 		streamlog_out(DEBUG1) << " setMeasurementsGBL ------------- END ----------------- " << std::endl;
 	}
     ///This function is the link between Millepede and the creation of global variable to the GBL points. 

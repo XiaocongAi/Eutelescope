@@ -199,7 +199,7 @@ void EUTelGeometryTelescopeGeoDescription::readSiPlanesLayout() {
 		_sensorIDVec.push_back(sensorID);
 	}
 	_nPlanes = _siPlanesParameters->getSiPlanesNumber();
-	std::sort(_sensorIDVec.begin(), _sensorIDVec.end(), doCompare(*this) );	
+	//std::sort(_sensorIDVec.begin(), _sensorIDVec.end(), doCompare(*this) );	
 }
 
 void EUTelGeometryTelescopeGeoDescription::readTrackerPlanesLayout() {

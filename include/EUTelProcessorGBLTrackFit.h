@@ -82,7 +82,8 @@ namespace eutelescope {
 			virtual void end();
 
     protected:
-            EVENT::IntVec _excludePlanes;         
+            EVENT::IntVec _excludePlanes;        
+            EVENT::IntVec _dutPlanes;
             int _mode;
             int _incMed;
 

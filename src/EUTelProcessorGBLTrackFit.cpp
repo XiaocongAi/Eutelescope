@@ -76,6 +76,7 @@ _mEstimatorType() //This is used by the GBL software for outliers down weighting
 	//This is the determines the how we down weight our outliers. This by default is set that each point will have the same weighting.
   registerOptionalParameter("GBLMEstimatorType", "GBL outlier down-weighting option (t,h,c)", _mEstimatorType, std::string() );
   registerOptionalParameter("ExcludePlanes", "This is the planes that will not be included in analysis", _excludePlanes ,IntVec());
+  registerOptionalParameter("dutPlanes", "This is the DUT planes used in analysis", _dutPlanes ,IntVec());
   registerOptionalParameter("Mode", "Will this processor do the track parameterisation for you. 1 => yes 0 => no ", _mode ,int(1));
   registerOptionalParameter("IncMed", "Do you want to include the medium as addtional scattering", _incMed ,int(0));
   registerOptionalParameter("chi2Cut", "Cut for output track.", _chi2Cut ,double(1000.0));
@@ -254,6 +255,10 @@ void EUTelProcessorGBLTrackFit::plotResidual(std::map< int, std::map<float, floa
     int dut2=20;
 
 
+          dut1 = _dutPlanes.at(0);
+          dut2 = _dutPlanes.at(1);
+
+//         std::cout<<"dut1="<<dut1<<"dut2="<<dut2<<std::endl;
 	/* Fill histograms */
 	std::map< int, std::map< float, float > >::iterator sensor_residual_it;
 	for(sensor_residual_it = sensorResidual.begin(); sensor_residual_it != sensorResidual.end(); sensor_residual_it++) {
