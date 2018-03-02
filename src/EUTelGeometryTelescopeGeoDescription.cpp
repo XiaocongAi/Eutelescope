@@ -553,7 +553,6 @@ void EUTelGeometryTelescopeGeoDescription::translateSiPlane2TGeo(TGeoVolume* pvo
             double rmax = _R0para.rmax;
             double rCentre = _R0para.rCentre;
  
- 
                   //if(SensorId ==15 || SensorId ==11 || SensorId == 19 || SensorId == 23)  _pixGeoMgr->addCastedAnnulusPlane( SensorId, siPlaneXNpixels(SensorId), siPlaneYNpixels(SensorId), siPlaneXSize(SensorId), siPlaneYSize(SensorId), siPlaneZSize(SensorId), pitchPhi1, stereoAngle, rmin, r1, rCentre,  siPlaneRadLength(SensorId), stVolName);  
                  // else if(SensorId ==16 || SensorId ==12 || SensorId == 20 || SensorId == 24)  _pixGeoMgr->addCastedAnnulusPlane( SensorId, siPlaneXNpixels(SensorId), siPlaneYNpixels(SensorId), siPlaneXSize(SensorId), siPlaneYSize(SensorId), siPlaneZSize(SensorId), pitchPhi1, stereoAngle, r1, r2, rCentre,      siPlaneRadLength(SensorId), stVolName);  
                  // else if(SensorId ==14 || SensorId ==10 || SensorId == 18 || SensorId == 22)  _pixGeoMgr->addCastedAnnulusPlane( SensorId, siPlaneXNpixels(SensorId), siPlaneYNpixels(SensorId), siPlaneXSize(SensorId), siPlaneYSize(SensorId), siPlaneZSize(SensorId), pitchPhi2, stereoAngle, r2, r3, rCentre,      siPlaneRadLength(SensorId), stVolName);  

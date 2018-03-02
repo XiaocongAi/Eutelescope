@@ -367,10 +367,11 @@ void EUTelProcessorAnnulusClustering::geometricClustering(LCEvent * evt, LCColle
 				//Then navigate to this pixel with the TGeo manager
 				geo::gGeometry()._geoManager->cd( (planePath+pixelPath).c_str() );
                                          
-                                streamlog_out ( DEBUG0 ) <<"planepath: "<<planePath <<"pixelPath: "<<pixelPath<<std::endl;
+                                //streamlog_out ( MESSAGE5 ) << "coordinates " << hitPixel.getXCoord()<<"planepath: "<<planePath <<"pixelPath: "<<pixelPath<<std::endl;
 				//get the imbedding tub 
 				TGeoShape* currentShape =  geo::gGeometry()._geoManager->GetCurrentVolume()->GetShape();
                                 TGeoMatrix *matrix =  geo::gGeometry()._geoManager->GetCurrentNode()->GetMatrix();
+                                //matrix->Print();      
                                 const double* rotation_matrix = matrix->GetRotationMatrix();
                                 double rot= asin(rotation_matrix[3]);
                                 double Fxpos=geo::gGeometry()._R0para.Fx;
@@ -420,9 +421,12 @@ void EUTelProcessorAnnulusClustering::geometricClustering(LCEvent * evt, LCColle
                                     y_mid = transformed2_pt[1] + (rmin+rmax)*0.5*sin(rot+PI*0.5);
                                   
                                     double rlength = sqrt( (x_mid - Fxpos)*(x_mid - Fxpos) + (y_mid - Fypos)*(y_mid - Fypos)); 
-                                    //streamlog_out(DEBUG2) <<"transformed2_pt  "<<transformed2_pt[0]<<", "<<transformed2_pt[1]<<std::endl;
-                                    //streamlog_out(MESSAGE5) <<" rlength = "<<rlength<< " rot = "<<rot + PI*0.5<<" mid of the strip = "<<x_mid<<", "<<y_mid<<std::endl;
-
+                                    /* 
+                                    if(hitPixel.getXCoord()<512)
+                                    streamlog_out(MESSAGE5) <<" planepath "<<planePath<<" strip_"<<hitPixel.getXCoord()+1<<" : x = "<<x_mid<<" , y = "<<y_mid<<" rlength = "<<rlength<<" rot = "<< rot+PI*0.5 <<" phi = "<<atan2(y_mid-Fypos, x_mid-Fxpos) <<std::endl;
+                                    else
+                                    streamlog_out(MESSAGE5) <<" planepath "<<planePath<<" strip_"<<hitPixel.getXCoord()-256 +1<<" : x = "<<x_mid<<" , y = "<<y_mid<<" rlength = "<<rlength<<" rot = "<< rot+PI*0.5 << " phi = "<<atan2(y_mid-Fypos, x_mid-Fxpos) <<std::endl;
+*/
                                     hitPixel.setPosX( x_mid );   //the x and y coordinate of the Annulus center 
                                     hitPixel.setPosY( y_mid );
                                     hitPixel.setr (rlength);

@@ -6,15 +6,6 @@
 namespace eutelescope {
  namespace geo {
 
-
-//AnnulusStripGeoDescr::AnnulusStripGeoDescr( 1025, 1153, 3, 97.779, 106.417, 0.00031, 0.0001932745,0.0001718368,0.02,384.5, 403.481, 427.462, 456.442, 488.423, 438.614,18.981, 23.981, 28.98, 31.981, 9.3660734): 
-//        EUTelGenericPixGeoDescr( 97.779, 106.417, 0.00031,//size X, Y, Z (size in mm of sensor) (taken using points Bx & Cx, Ay and rmax-rCentre)
-//                                 0, 1025,0,1153, 0, 3,       //minX1, maxX1, minX2, maxX2, minY, maxY number of pixels in x and y
-//                                 0.0001932745,0.0001718368,0.02, //pitchPhi1, pitchPhi2, stereo angle (in rads)
-//                                 384.5, 403.481, 427.462, 456.442, 488.423, 438.614, //rmin, r1, r2, r3, rmax, rCentre (in mm)
-//                                 18.981, 23.981, 28.98, 31.981,// the 4 striplengths (in mm)
-//                                 9.3660734 )         //rad length
-
 AnnulusStripGeoDescr::AnnulusStripGeoDescr( int xPixel, int yPixel, double xSize, double ySize, double zSize, double pitchPhi, double stereoAngle, double rmin, double rmax, double rCentre, double radLength):
        EUTelGenericPixGeoDescr( xSize, ySize, zSize,//size X, Y, Z (size in mm of sensor) (taken using points Bx & Cx, Ay and rmax-rCentre)
                                 0, xPixel-1, 0, yPixel-1,       //minX1, maxX1, minX2, maxX2, minY, maxY number of pixels in x and y
@@ -24,6 +15,7 @@ AnnulusStripGeoDescr::AnnulusStripGeoDescr( int xPixel, int yPixel, double xSize
 
 {
       Double_t PI=3.14159265358979,deg=180/PI;
+  
  
       Double_t phi_i,b,r,c,x,y,gradient,theta;
       //Create the material for the sensor
@@ -35,14 +27,14 @@ AnnulusStripGeoDescr::AnnulusStripGeoDescr( int xPixel, int yPixel, double xSize
       rowstrip = _tGeoManager->MakeTubs( "sensarea_strip" , Si, rmin, rmax, zSize/2, 90+(-pitchPhi/2)*deg,90+(pitchPhi/2)*deg);
 
       //The formula used for calculating strip position is defined in the ATLAS12EC Technical Specs
-      theta=pitchPhi*((xPixel-1)/2.0-0.5)+stereoAngle+PI/2;  
+      theta=pitchPhi*((xPixel-1)/2.0)+stereoAngle+PI/2;  
 
     
-      if(xPixel<1090){  
-      //placement of first two rows
+      if(xPixel>1090){  
+      //placement of last two rows
         for( int i = xPixel-1; i >=0; i-- ){
           TGeoCombiTrans* transform=new TGeoCombiTrans(0,0,0,new TGeoRotation("rot",0,0,0));
-          //get position of each strip for first row
+          //get position of each strip
           phi_i=(i -(xPixel-1)/2.0)*pitchPhi;  
           b=-2*(2*rCentre*sin(stereoAngle/2))*sin(stereoAngle/2+phi_i);
           c=pow((2*rCentre*sin(stereoAngle/2)),2)-pow(rmin,2);
@@ -60,10 +52,10 @@ AnnulusStripGeoDescr::AnnulusStripGeoDescr( int xPixel, int yPixel, double xSize
        }
       }
       else{
-      //placement of last two rows
+      //placement of first two rows
        for( int i = 0; i <=xPixel-1; i++ ){
           TGeoCombiTrans* transform=new TGeoCombiTrans(0,0,0,new TGeoRotation("rot",0,0,0));
-          //get position of each strip for second row
+          //get position of each strip
           phi_i=((xPixel -1 - i) - (xPixel-1)/2.0)*pitchPhi;  
           b=-2*(2*rCentre*sin(stereoAngle/2))*sin(stereoAngle/2+phi_i);
           c=pow((2*rCentre*sin(stereoAngle/2)),2)-pow(rmin,2);
@@ -74,6 +66,7 @@ AnnulusStripGeoDescr::AnnulusStripGeoDescr( int xPixel, int yPixel, double xSize
           //rotate to get correct angle of strip
           transform->RotateZ(theta*deg-90);
           transform->SetTranslation(x-rmin*cos(theta),y-rmin*sin(theta),0);  //The R0 center has the coordinate (0, 0)
+
           //add the nodes
           plane->AddNode(rowstrip,i+1,transform);
           //get angle of next strip

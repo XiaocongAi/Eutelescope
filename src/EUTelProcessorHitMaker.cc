@@ -370,9 +370,8 @@ void EUTelProcessorHitMaker::processEvent (LCEvent * event) {
                                  {
   
                                          EUTelAnnulusClusterImpl cluster(trackerData);
-                                          cluster.getGeometricCenterOfGravity(xPos, yPos);
-                                          //cluster.getHitCovMatrix(resolutionX, resolutionY,covmatrix);
-                                          //cluster.getAnnulusCenterOfGravity(Fxpos, Fypos, xPos, yPos);
+                                          //cluster.getGeometricCenterOfGravity(xPos, yPos);
+                                          cluster.getAnnulusCenterOfGravity(Fxpos, Fypos, xPos, yPos);
                                   }
                                  else
                                  {

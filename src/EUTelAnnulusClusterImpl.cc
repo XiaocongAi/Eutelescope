@@ -117,7 +117,7 @@ void EUTelAnnulusClusterImpl::getAnnulusCenterOfGravity(float& FxCoord, float& F
         xCoG = rCoG*cos(phiCoG) + FxCoord;
         yCoG = rCoG*sin(phiCoG) + FyCoord;
 
-     //   streamlog_out(MESSAGE5)<<" Hit position is "<<xCoG<<" "<<yCoG<<" with r = "<<rCoG<<" and phi = "<<phiCoG<<std::endl;
+ //       streamlog_out(MESSAGE5)<<"cl_size = "<<size()<<" Hit position is "<<xCoG<<" "<<yCoG<<" with r = "<<rCoG<<" and phi = "<<phiCoG<<std::endl;
         delete pixel;
 }
 
