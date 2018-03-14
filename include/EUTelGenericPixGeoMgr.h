@@ -55,7 +55,7 @@ public:
         
 	void addCastedPlane(int planeID, int xPixel, int yPixel, double xSize, double ySize, double zSize, double radLength, std::string planeVolume);
 
-        void addCastedAnnulusPlane(int planeID, int xPixel, int yPixel, double xSize, double ySize, double zSize, double pitchPhi, double stereoAngle, double rmin, double rmax, double rCentre, double radLength, std::string planeVolume);
+        void addCastedAnnulusPlane(int planeID, int xPixel, int yPixel, double xSize, double ySize, double zSize, double pitchPhi, double stereoAngle, double rmin, double rmax, double rCentre, int order, double radLength, std::string planeVolume);
 
 	/** Method to get the EUTelGenericPixGeoDescr of a plane. 
 	 * 

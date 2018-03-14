@@ -39,7 +39,6 @@ EUTelGenericPixGeoMgr::~EUTelGenericPixGeoMgr()
 	}
 }
 
-//TODO: comments
 void EUTelGenericPixGeoMgr::addCastedPlane(int planeID, int xPixel, int yPixel, double xSize, double ySize, double zSize, double radLength, std::string planeVolume)
 {
 	EUTelGenericPixGeoDescr* pixgeodescrptr = NULL;
@@ -75,8 +74,7 @@ void EUTelGenericPixGeoMgr::addCastedPlane(int planeID, int xPixel, int yPixel, 
 	streamlog_out( MESSAGE3 )  << "Adding plane: " << planeID << " with geoLibName: " << name << " in volume " << planeVolume << std::endl;
 }
 
-//added by Xiaocong
- void EUTelGenericPixGeoMgr::addCastedAnnulusPlane(int planeID, int xPixel, int yPixel, double xSize, double ySize, double zSize, double pitchPhi, double stereoAngle, double rmin,  double rmax, double rCentre, double radLength, std::string planeVolume)
+ void EUTelGenericPixGeoMgr::addCastedAnnulusPlane(int planeID, int xPixel, int yPixel, double xSize, double ySize, double zSize, double pitchPhi, double stereoAngle, double rmin,  double rmax, double rCentre, int order, double radLength, std::string planeVolume)
  {
          EUTelGenericPixGeoDescr* pixgeodescrptr = NULL;
          int rminMap  = static_cast<int>(1000*rmin+0.5);
@@ -102,7 +100,7 @@ void EUTelGenericPixGeoMgr::addCastedPlane(int planeID, int xPixel, int yPixel, 
          else
          {
                  streamlog_out( MESSAGE3 ) << "Didnt find " << name << " yet, thus creating" << std::endl;
-                 pixgeodescrptr = new AnnulusStripGeoDescr(xPixel, yPixel, xSize, ySize, zSize, pitchPhi, stereoAngle, rmin, rmax, rCentre, radLength);  //where the pixel description actually addee!
+                 pixgeodescrptr = new AnnulusStripGeoDescr(xPixel, yPixel, xSize, ySize, zSize, pitchPhi, stereoAngle, rmin, rmax, rCentre, order, radLength);  //where the pixel description actually added!
                  streamlog_out( MESSAGE3 ) << "Inserting " << name << " into map" << std::endl;
                  _geoDescriptions.insert( std::make_pair(planeID, pixgeodescrptr) );
                  _castedDescriptions.insert( std::make_pair(name, pixgeodescrptr) );

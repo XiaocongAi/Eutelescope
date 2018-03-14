@@ -32,11 +32,8 @@ void EUTelAnnulusClusterImpl::getClusterGeomInfo(float& FxCoord, float& FyCoord,
 		getSparsePixelAt( index , pixel);
 
 		//And its position
-		//float xCur = pixel->getPosX();
-		//float yCur = pixel->getPosY();
                 float rlength = pixel->getr();
                 float ang = pixel->getang();
-                //streamlog_out(MESSAGE5)<<"index = "<<index<<" r = "<<rlength<<" ang = "<<ang<<" rmin = "<<pixel->getRmin()<<" rmax = "<<pixel->getRmax()<<" dphi = "<<pixel->getdphi()<<std::endl;
 
 		if( ang < phiMin )
 		{

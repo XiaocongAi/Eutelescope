@@ -318,10 +318,8 @@ bool EUTelPatRecTriplets::getDoubHitOnTraj(doublets const& doub, std::vector<uns
         std::vector<EUTelHit> hits =  _mapHitsVecPerPlane.at(*itID);
         float distBest = 10000000;
         EUTelHit hitBest;
-//        std::cout<<"Hits Number " << hits.size() << " " << " ID " << *itID  << std::endl;
 
         for(std::vector<EUTelHit>::iterator itHit = hits.begin(); itHit != hits.end(); ++itHit){
-  //          std::cout<<"Hit location " << itHit->getLocation() << std::endl;
 
             double hitPosX = itHit->getPositionGlobal()[0]; 
             double hitPosY = itHit->getPositionGlobal()[1]; 
@@ -329,22 +327,22 @@ bool EUTelPatRecTriplets::getDoubHitOnTraj(doublets const& doub, std::vector<uns
 
             std::vector<float>  pos = getDoubPosAtZ(doub, hitPosZ);/// Could calculate this once. Might be a bit off for tilted sensors.
 
-            float dist = getDistLocal(itHit, pos);
-
-    //        std::cout<<"Dist " << dist  << std::endl;
+            float dist;
+            if(_planeDimensions[*itID] == 2) 
+                dist = getDistLocal(itHit, pos);
+            else
+                dist = getRadialDistLocal(itHit, pos);  //Calculate the phi distance for radial strips!
 
             if(itHit == hits.begin()){
                 hitBest = *itHit;
                 distBest = dist;
-      //          std::cout<<"DistBest begin " << distBest  << std::endl;
-
             }
 
             if(dist < distBest){
                 hitBest = *itHit;
                 distBest = dist;
-        //        std::cout<<"DistBest " << distBest  << std::endl;
             }
+
             if(itHit == hits.end()-1){
                if(_planeDimensions[*itID] == 2) 
                _DUTWindowHisto ->fill(distBest);
@@ -352,30 +350,26 @@ bool EUTelPatRecTriplets::getDoubHitOnTraj(doublets const& doub, std::vector<uns
                 _DUTRadialWindowHisto ->fill(distBest);
 
             }
-        }
+         }
 
          if(_planeDimensions[*itID] == 2) {
                 if(distBest >  _dutDistCut){
-           //         std::cout<<"DistBest Fail!!!!! " << distBest  << std::endl;
-        
                     streamlog_out(DEBUG1) << "Doublet cut on FEI4!! " << distBest <<">"<< _dutDistCut<<std::endl;
                     continue;
                 }
          }
          else{
                if(distBest >  _dutRadialDistCut){
-         //         std::cout<<"DistBest Fail!!!!! " << distBest  << std::endl;
                   
                   streamlog_out(DEBUG1) << "Doublet cut on Radial strips!! " << distBest <<">"<< _dutRadialDistCut<<std::endl;
                   continue;
               }
         }
-    //    std::cout<<"Pass "  << std::endl;
 
         if(_planeDimensions[*itID] == 2) 
           streamlog_out(DEBUG1) << "PASS Doublet cut on FEI4!! " << distBest <<"<"<< _dutDistCut << std::endl;
         else
-          streamlog_out(DEBUG1) << "PASS Doublet cuti on Radial strips!! " << distBest <<"<"<< _dutRadialDistCut << std::endl;
+          streamlog_out(DEBUG1) << "PASS Doublet cut on Radial strips!! " << distBest <<"<"<< _dutRadialDistCut << std::endl;
    
 
         newHits.push_back(hitBest);
@@ -389,6 +383,7 @@ bool EUTelPatRecTriplets::getDoubHitOnTraj(doublets const& doub, std::vector<uns
         return true;
     }
 }
+
 float EUTelPatRecTriplets::getDistLocal(std::vector<EUTelHit>::iterator itHit, std::vector<float>& pos){
     double locPos [3];
     const double referencePoint[]	= {pos.at(0),pos.at(1) ,itHit->getPositionGlobal()[2]};
@@ -405,7 +400,6 @@ float EUTelPatRecTriplets::getDistLocal(std::vector<EUTelHit>::iterator itHit, s
     Eigen::Vector3d local;
     local = rotInv*diff;
 
-
     if(_planeDimensions[itHit->getLocation()] == 2){ 
         streamlog_out(DEBUG0) <<"Pixel:  X delta: " << fabs(local[0]) << " Y delta: " << fabs(local[1]) << std::endl;
         dist = sqrt(pow(local[0],2)+pow(local[1],2));
@@ -413,21 +407,8 @@ float EUTelPatRecTriplets::getDistLocal(std::vector<EUTelHit>::iterator itHit, s
         if(_dutDirection==0) 
         {
             streamlog_out(DEBUG0) << "Strip: " <<"X delta: " << fabs(local[0]) << std::endl;
-            /////Keep it positive, the distance that is!!!
-//====================the dist for R0 strips should be based on the angle difference===========================
-            double Fxpos=geo::gGeometry()._R0para.Fx ;
-            double Fypos=geo::gGeometry()._R0para.Fy ;
-             
-            double  measL[3] =  {itHit->getPosition()[0], itHit->getPosition()[1], itHit->getPosition()[2]};
-            double  preL[3] = {itHit->getPosition()[0] + local[0], itHit->getPosition()[1]+ local[1], itHit->getPosition()[2]+ local[2]}; 
-
-            double ang_meas = atan2(measL[1] - Fypos,measL[0] - Fxpos);
-            double ang_pre = atan2(preL[1] - Fypos,preL[0] - Fxpos);
-            double r_meas =  sqrt((measL[0] - Fxpos )*(measL[0] - Fxpos) + (measL[1] - Fypos)*(measL[1]  - Fypos));
-            dist  =  sqrt(pow(ang_pre - ang_meas,2)); 
-//============================================================================================================
-
-    //        dist = sqrt(pow(local[0],2));
+            ///Keep it positive, the distance that is!!!
+            dist = sqrt(pow(local[0],2));
         }else if(_dutDirection==1){ 
             streamlog_out(DEBUG0) << "Strip: " <<"Y delta: " << fabs(local[1]) << std::endl;
             ///Keep it positive, the distance that is!!!
@@ -442,7 +423,48 @@ float EUTelPatRecTriplets::getDistLocal(std::vector<EUTelHit>::iterator itHit, s
 }
 
 
+float EUTelPatRecTriplets::getRadialDistLocal(std::vector<EUTelHit>::iterator itHit, std::vector<float>& pos){
+     double locPos [3];
+     const double referencePoint[]       = {pos.at(0),pos.at(1) ,itHit->getPositionGlobal()[2]};
+     geo::gGeometry().master2Local( itHit->getLocation(), referencePoint, locPos);
+     double dist = 99999;
+     Eigen::Matrix3d rot  =  geo::gGeometry().getRotMatrixEig(itHit->getLocation());
+     Eigen::Matrix3d rotInv = rot.transpose();
+     Eigen::Vector3d preG; 
+     Eigen::Vector3d measG;
+     Eigen::Vector3d diff;
+     preG  << pos.at(0), pos.at(1), 0;
+     measG  << itHit->getPositionGlobal()[0] ,  itHit->getPositionGlobal()[1], 0;
+     diff = preG - measG;
+     Eigen::Vector3d local;
+     local = rotInv*diff;
+ 
+     if(_planeDimensions[itHit->getLocation()] !=1 ){
+        throw(lcio::Exception( "This is not a strip sensor!"));
+     }else {
+         if (_dutDirection==0){  
+            /**The dist for radial strips should be based on the phi angle difference*/
+             std::map<int, geo::EUTelAnnulusGear>::iterator mapIt = geo::gGeometry()._AnnulusGearMap.find( itHit->getLocation() );
+             if( mapIt != geo::gGeometry()._AnnulusGearMap.end() ) {
+                 geo::EUTelAnnulusGear para = mapIt->second; 
+                 double Fxpos=para.Fx ;
+                 double Fypos=para.Fy ;
+ 
+                 double  measL[3] =  {itHit->getPosition()[0], itHit->getPosition()[1], itHit->getPosition()[2]};
+                 double  preL[3] = {itHit->getPosition()[0] + local[0], itHit->getPosition()[1]+ local[1], itHit->getPosition()[2]+ local[2]};
+                 double ang_meas = atan2(measL[1] - Fypos,measL[0] - Fxpos);
+                 double ang_pre = atan2(preL[1] - Fypos,preL[0] - Fxpos);
 
+                 dist  =  sqrt(pow(ang_pre - ang_meas,2));
+             } else {  
+                 throw(lcio::Exception( "Please check the sensorID!"));
+             }
+         }else{
+             throw(lcio::Exception( "The direction of DUT for radial strips is wrong!"));
+         }
+     }
+     return dist;
+}
 
 std::vector<EUTelTrack> EUTelPatRecTriplets::getMinFakeTracks(){
     std::vector<EUTelTrack> tracks;

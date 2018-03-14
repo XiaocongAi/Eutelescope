@@ -319,8 +319,6 @@ void EUTelProcessorHitMaker::processEvent (LCEvent * event) {
 
 			}
 
-                        float Fxpos=geo::gGeometry()._R0para.Fx;
-                        float Fypos=geo::gGeometry()._R0para.Fy; 
 
 			// LOCAL coordinate system !!!!!!
 			double telPos[3];
@@ -361,21 +359,28 @@ void EUTelProcessorHitMaker::processEvent (LCEvent * event) {
 				telPos[1] = yPos;
 				telPos[2] = 0;
 			}
-
                         else if(clusterType == kEUTelAnnulusClusterImpl)
                         {
-                                 float xPos = 0;
-                                 float yPos = 0;
+                                float xPos = 0;
+                                float yPos = 0;
                                 if(pixelType == kEUTelAnnulusPixel)
-                                 {
+                                {
   
                                          EUTelAnnulusClusterImpl cluster(trackerData);
                                           //cluster.getGeometricCenterOfGravity(xPos, yPos);
-                                          cluster.getAnnulusCenterOfGravity(Fxpos, Fypos, xPos, yPos);
-                                  }
+
+                                         std::map<int, geo::EUTelAnnulusGear>::iterator mapIt = geo::gGeometry()._AnnulusGearMap.find(sensorID );
+                                         if( mapIt != geo::gGeometry()._AnnulusGearMap.end() ) {
+                                              geo::EUTelAnnulusGear para = mapIt->second;
+                                              float Fxpos=para.Fx ;
+                                              float Fypos=para.Fy ;
+                                              cluster.getAnnulusCenterOfGravity(Fxpos, Fypos, xPos, yPos);
+                                         } else {
+                                              throw(lcio::Exception( "Please check the sensorID!"));
+                                         }
+                                 }
                                  else
                                  {
-                                         //ERROR
                                          streamlog_out( ERROR4 ) << "We do not support pixel type: " << pixelType << " for kEUTelAnnulusClusterImpl" << std    ::endl;
                                          throw UnknownDataTypeException("Pixel type not supported for kEUTelAnnulusClusterImpl");
                                  }

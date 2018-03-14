@@ -374,179 +374,180 @@ void EUTelProcessorAnnulusClustering::geometricClustering(LCEvent * evt, LCColle
                                 //matrix->Print();      
                                 const double* rotation_matrix = matrix->GetRotationMatrix();
                                 double rot= asin(rotation_matrix[3]);
-                                double Fxpos=geo::gGeometry()._R0para.Fx;
-                                double Fypos=geo::gGeometry()._R0para.Fy;        //get through other way?                       
  
-                                    TGeoTubeSeg* tube = dynamic_cast<TGeoTubeSeg*>( currentShape );
+                                TGeoTubeSeg* tube = dynamic_cast<TGeoTubeSeg*>( currentShape );
 
+                                hitPixel.setRmin(tube->GetRmin());
+                                hitPixel.setRmax(tube->GetRmax());
+                                hitPixel.setdphi( fabs(tube->GetPhi2()-tube->GetPhi1() )*1.0/deg );
+                                hitPixel.setang( rot+PI*0.5 );
 
+                                //Get how deep the node description goes (this is how often we have to transform to get coordinates in the local plane coordinate system)
+                                std::vector<std::string> split = Utility::stringSplit( planePath+pixelPath , "/", false);
 
-                                     hitPixel.setRmin(tube->GetRmin());
-                                     hitPixel.setRmax(tube->GetRmax());
-                                     hitPixel.setdphi( fabs(tube->GetPhi2()-tube->GetPhi1() )*1.0/deg );
-                                     hitPixel.setang( rot+PI*0.5 );
+                                //Three recursions for the telescope/plane
+                                int recursionDepth = split.size() - 3;  //this needs to be changed?
 
-                                    //Get how deep the node description goes (this is how often we have to transform to get coordinates in the local plane coordinate system)
-                                    std::vector<std::string> split = Utility::stringSplit( planePath+pixelPath , "/", false);
+                                //The do the transformation
+                                Double_t origin_pt[3] = {0,0,0};
+                                Double_t transformed1_pt[3];
+                                Double_t transformed2_pt[3];
+                                gGeoManager->GetCurrentNode()->LocalToMaster(origin_pt, transformed1_pt);
 
-                                    //Three recursions for the telescope/plane
-                                    int recursionDepth = split.size() - 3;  //this needs to be changed?
-
-                                    //The do the transformation
-                                    Double_t origin_pt[3] = {0,0,0};
-                                    Double_t transformed1_pt[3];
-                                    Double_t transformed2_pt[3];
-                                    gGeoManager->GetCurrentNode()->LocalToMaster(origin_pt, transformed1_pt);
-
-                                    transformed2_pt[0] = transformed1_pt[0]; //coordinate of the tube on the plane
-                                    transformed2_pt[1] = transformed1_pt[1];
-                                    transformed2_pt[2] = transformed1_pt[2];
-                                      
-                                    streamlog_out(DEBUG2) <<" planepath "<<planePath<<"  "<<" pixelPath "<<pixelPath<<" recursionDepth "<< recursionDepth<<std::endl;
-                                    //transform into local plane coordinate system
-                                    for(int i = 1 ; i < recursionDepth; ++i)  //recursionDepth == 1 here
-                                    {
-                                       gGeoManager->GetMother(i)->LocalToMaster(transformed1_pt, transformed2_pt);
-                                       transformed1_pt[0] = transformed2_pt[0];
-                                       transformed1_pt[1] = transformed2_pt[1];
-                                       transformed1_pt[2] = transformed2_pt[2];
-                                    }
-
-                                    //store all the position information in the AnnulusPixel
-                                    Double_t x_mid, y_mid, rmin, rmax;
-                                    rmin = tube->GetRmin();
-                                    rmax = tube->GetRmax();
-
-                                    x_mid = transformed2_pt[0] + (rmin+rmax)*0.5*cos(rot+PI*0.5);
-                                    y_mid = transformed2_pt[1] + (rmin+rmax)*0.5*sin(rot+PI*0.5);
+                                transformed2_pt[0] = transformed1_pt[0]; //coordinate of the tube on the plane
+                                transformed2_pt[1] = transformed1_pt[1];
+                                transformed2_pt[2] = transformed1_pt[2];
                                   
-                                    double rlength = sqrt( (x_mid - Fxpos)*(x_mid - Fxpos) + (y_mid - Fypos)*(y_mid - Fypos)); 
-                                    /* 
-                                    if(hitPixel.getXCoord()<512)
-                                    streamlog_out(MESSAGE5) <<" planepath "<<planePath<<" strip_"<<hitPixel.getXCoord()+1<<" : x = "<<x_mid<<" , y = "<<y_mid<<" rlength = "<<rlength<<" rot = "<< rot+PI*0.5 <<" phi = "<<atan2(y_mid-Fypos, x_mid-Fxpos) <<std::endl;
-                                    else
-                                    streamlog_out(MESSAGE5) <<" planepath "<<planePath<<" strip_"<<hitPixel.getXCoord()-256 +1<<" : x = "<<x_mid<<" , y = "<<y_mid<<" rlength = "<<rlength<<" rot = "<< rot+PI*0.5 << " phi = "<<atan2(y_mid-Fypos, x_mid-Fxpos) <<std::endl;
-*/
-                                    hitPixel.setPosX( x_mid );   //the x and y coordinate of the Annulus center 
-                                    hitPixel.setPosY( y_mid );
+                                streamlog_out(DEBUG2) <<" planepath "<<planePath<<"  "<<" pixelPath "<<pixelPath<<" recursionDepth "<< recursionDepth<<std::endl;
+                                //transform into local plane coordinate system
+                                for(int i = 1 ; i < recursionDepth; ++i)  //recursionDepth == 1 here
+                                {
+                                   gGeoManager->GetMother(i)->LocalToMaster(transformed1_pt, transformed2_pt);
+                                   transformed1_pt[0] = transformed2_pt[0];
+                                   transformed1_pt[1] = transformed2_pt[1];
+                                   transformed1_pt[2] = transformed2_pt[2];
+                                }
+
+                                //store all the position information in the AnnulusPixel
+                                Double_t x_mid, y_mid, rmin, rmax;
+                                rmin = tube->GetRmin();
+                                rmax = tube->GetRmax();
+
+                                x_mid = transformed2_pt[0] + (rmin+rmax)*0.5*cos(rot+PI*0.5);
+                                y_mid = transformed2_pt[1] + (rmin+rmax)*0.5*sin(rot+PI*0.5);
+                                
+
+                                std::map<int, geo::EUTelAnnulusGear>::iterator mapIt = geo::gGeometry()._AnnulusGearMap.find(sensorID );
+                                if( mapIt != geo::gGeometry()._AnnulusGearMap.end() ) {
+                                    geo::EUTelAnnulusGear para = mapIt->second;
+                                    double Fxpos=para.Fx ;
+                                    double Fypos=para.Fy ;
+                                    double rlength = sqrt( (x_mid - Fxpos)*(x_mid - Fxpos) + (y_mid - Fypos)*(y_mid - Fypos));
                                     hitPixel.setr (rlength);
-				    hitPixelVec.push_back( hitPixel );
+                                } else {
+                                    throw(lcio::Exception( "Please check the sensorID!"));
+                                }
+                                    
+                                hitPixel.setPosX( x_mid );   //the x and y coordinate of the Annulus center 
+                                hitPixel.setPosY( y_mid );
+				hitPixelVec.push_back( hitPixel );
 
 			}		
-                                streamlog_out(DEBUG2)<<"size of hitpixel for sensor "<<sensorID<<" is "<<hitPixelVec.size()<<std::endl;
+                        
+                        streamlog_out(DEBUG2)<<"size of hitpixel for sensor "<<sensorID<<" is "<<hitPixelVec.size()<<std::endl;
 
-                                int ncluster=0;
-                                std::vector<EUTelAnnulusPixel> newlyAdded;
-		        	//We now cluster those hits together
-			        while( !hitPixelVec.empty() )
-			        {
-			        	// prepare a TrackerData to store the cluster candidate
-			        	std::auto_ptr< TrackerDataImpl > zsCluster ( new TrackerDataImpl );
-			        	// prepare a reimplementation of sparsified cluster
-			        	std::auto_ptr<EUTelGenericSparseClusterImpl<EUTelAnnulusPixel > > sparseCluster ( new EUTelGenericSparseClusterImpl<EUTelAnnulusPixel >( zsCluster.get() ) );
+                        int ncluster=0;
+                        std::vector<EUTelAnnulusPixel> newlyAdded;
+		        //We now cluster those hits together
+			while( !hitPixelVec.empty() )
+			{
+				// prepare a TrackerData to store the cluster candidate
+				std::auto_ptr< TrackerDataImpl > zsCluster ( new TrackerDataImpl );
+				// prepare a reimplementation of sparsified cluster
+				std::auto_ptr<EUTelGenericSparseClusterImpl<EUTelAnnulusPixel > > sparseCluster ( new EUTelGenericSparseClusterImpl<EUTelAnnulusPixel >( zsCluster.get() ) );
 
-			        	//First we need to take any pixel, so let's take the first one
-			        	//Add it to the cluster as well as the newly added pixels
-			        	newlyAdded.push_back( hitPixelVec.front() );
-			        	sparseCluster->addSparsePixel( &hitPixelVec.front() );
-			        	//And remove it from the original collection
-			        	hitPixelVec.erase( hitPixelVec.begin() );
+				//First we need to take any pixel, so let's take the first one
+				//Add it to the cluster as well as the newly added pixels
+				newlyAdded.push_back( hitPixelVec.front() );
+				sparseCluster->addSparsePixel( &hitPixelVec.front() );
+				//And remove it from the original collection
+				hitPixelVec.erase( hitPixelVec.begin() );
 		
-			        	//Now process all newly added pixels, initially this is the just previously added one
-			        	//but in the process of neighbour finding we continue to add new pixels
-			        	while( !newlyAdded.empty() )
-			        	{
-			        		bool newlyDone = true;
-			        		float r1, ang1,r2, ang2, rmax1, rmin1, rmax2, rmin2,  t1 , t2, dT, dR, dAng, dRmax, dRmin, cutphi, width_ang1, width_ang2;
+				//Now process all newly added pixels, initially this is the just previously added one
+				//but in the process of neighbour finding we continue to add new pixels
+				while( !newlyAdded.empty() )
+				{
+					bool newlyDone = true;
+					float r1, ang1,r2, ang2, rmax1, rmin1, rmax2, rmin2,  t1 , t2, dT, dR, dAng, dRmax, dRmin, cutphi, width_ang1, width_ang2;
 
-			        		//check against all pixels in the hitPixelVec
-			        		for( std::vector<EUTelAnnulusPixel>::iterator hitVec = hitPixelVec.begin(); hitVec != hitPixelVec.end(); ++hitVec )
-			        		{
-			        			//get the relevant infos from the newly added pixel
-			        			t1 =  newlyAdded.front().getTime();
-			        			//r1 = newlyAdded.front().getr();
-			        			rmax1 = newlyAdded.front().getRmax();
-			        			rmin1 = newlyAdded.front().getRmin();
-			        			ang1 = newlyAdded.front().getang();
-                                                        width_ang1 =  newlyAdded.front().getdphi();
-			        			//and the pixel we test against
-			        			t2 = hitVec->getTime();
-			        			//r2 = hitVec->getr();
-			        			rmax2 = hitVec->getRmax();
-			        			rmin2 = hitVec->getRmin();
-			        			ang2 = hitVec->getang();
-			        			width_ang2 = hitVec->getdphi();
+					//check against all pixels in the hitPixelVec
+					for( std::vector<EUTelAnnulusPixel>::iterator hitVec = hitPixelVec.begin(); hitVec != hitPixelVec.end(); ++hitVec )
+					{
+						//get the relevant infos from the newly added pixel
+						t1 =  newlyAdded.front().getTime();
+						//r1 = newlyAdded.front().getr();
+						rmax1 = newlyAdded.front().getRmax();
+						rmin1 = newlyAdded.front().getRmin();
+						ang1 = newlyAdded.front().getang();
+                                                width_ang1 =  newlyAdded.front().getdphi();
+						//and the pixel we test against
+						t2 = hitVec->getTime();
+						//r2 = hitVec->getr();
+						rmax2 = hitVec->getRmax();
+						rmin2 = hitVec->getRmin();
+						ang2 = hitVec->getang();
+						width_ang2 = hitVec->getdphi();
 
-                                                        //dR = fabs(r1 -r2);
-			        			dAng = fabs(ang1 - ang2);
-			        			dT = fabs(t1 - t2);
-                                                        dRmin =  fabs(rmin1-rmin2);
-                                                        dRmax =  fabs(rmax1-rmax2);
-			        			cutphi = fabs(width_ang1+width_ang2)*0.5*1.01; //uncertainty with the geo framework
+                                                //dR = fabs(r1 -r2);
+						dAng = fabs(ang1 - ang2);
+						dT = fabs(t1 - t2);
+                                                dRmin =  fabs(rmin1-rmin2);
+                                                dRmax =  fabs(rmax1-rmax2);
+						cutphi = fabs(width_ang1+width_ang2)*0.5*1.01; //uncertainty with the geo framework
 
-			        			//if they pass the spatial and temporal cuts, we add them	
-			        			if( (dRmin <= 0.0001 ) && (dRmax <= 0.0001) && (dAng <= cutphi) && (dT <= _cutT) )
-			        			{
-			        				//add them to the cluster as well as to the newly added ones
-                                                                //streamlog_out(DEBUG0) <<"coordinates are"<<newlyAdded.front().getXCoord()<<", "<<hitVec->getXCoord()<<", "<< " dRmin = "<<dRmin<<" dRmax = "<<dRmax<<" dAng = "<<dAng<<" dT = "<<dT<<" width_ang1 = "<<width_ang1<< " width_ang2 = "<<width_ang2<<std::endl;
-			        				newlyAdded.push_back( *hitVec );
-			        				sparseCluster->addSparsePixel( &(*hitVec) );
-			        				//and remove it from the original collection
-			        				hitPixelVec.erase( hitVec );
-			        				//for the pixel we test there might be other neighbours, we still have to check
-			        				newlyDone = false;
-			        				break;
-			        			}
-			        		}
-			        	
-			        		//if no neighbours are found, we can delete the pixel from the newly added
-			        		//we tested against _ALL_ non cluster pixels, there are no other pixels
-			        		//which could be neighbours
-			        		if(newlyDone) newlyAdded.erase( newlyAdded.begin() );
-			        	}	
+						//if they pass the spatial and temporal cuts, we add them	
+						if( (dRmin <= 0.0001 ) && (dRmax <= 0.0001) && (dAng <= cutphi) && (dT <= _cutT) )
+						{
+							//add them to the cluster as well as to the newly added ones
+                                                        //streamlog_out(DEBUG0) <<"coordinates are"<<newlyAdded.front().getXCoord()<<", "<<hitVec->getXCoord()<<", "<< " dRmin = "<<dRmin<<" dRmax = "<<dRmax<<" dAng = "<<dAng<<" dT = "<<dT<<" width_ang1 = "<<width_ang1<< " width_ang2 = "<<width_ang2<<std::endl;
+							newlyAdded.push_back( *hitVec );
+							sparseCluster->addSparsePixel( &(*hitVec) );
+							//and remove it from the original collection
+							hitPixelVec.erase( hitVec );
+							//for the pixel we test there might be other neighbours, we still have to check
+							newlyDone = false;
+							break;
+						}
+					}
+				
+					//if no neighbours are found, we can delete the pixel from the newly added
+					//we tested against _ALL_ non cluster pixels, there are no other pixels
+					//which could be neighbours
+					if(newlyDone) newlyAdded.erase( newlyAdded.begin() );
+				}	
 
-			        	//Now we need to process the found cluster
-			        	if ( sparseCluster->size() > 0 ) 
-			        	{
-			        		// set the ID for this zsCluster
-                                                //streamlog_out(MESSAGE5)<<"cluster size for sensor "<<sensorID<<" is "<<sparseCluster->size()<<std::endl;
-			        		idZSClusterEncoder["sensorID"]  = sensorID;
-			        		idZSClusterEncoder["sparsePixelType"] = static_cast<int>( kEUTelAnnulusPixel );
-			        		idZSClusterEncoder["quality"] = 0;
-			        		idZSClusterEncoder.setCellID( zsCluster.get() );
+				//Now we need to process the found cluster
+				if ( sparseCluster->size() > 0 ) 
+				{
+					// set the ID for this zsCluster
+                                        //streamlog_out(MESSAGE5)<<"cluster size for sensor "<<sensorID<<" is "<<sparseCluster->size()<<std::endl;
+					idZSClusterEncoder["sensorID"]  = sensorID;
+					idZSClusterEncoder["sparsePixelType"] = static_cast<int>( kEUTelAnnulusPixel );
+					idZSClusterEncoder["quality"] = 0;
+					idZSClusterEncoder.setCellID( zsCluster.get() );
 
-			        		// add it to the cluster collection
-			        		sparseClusterCollectionVec->push_back( zsCluster.get() );
+					// add it to the cluster collection
+					sparseClusterCollectionVec->push_back( zsCluster.get() );
 
-			        		//int xSeed, ySeed, xSize, ySize;
-			        		//sparseCluster->getClusterInfo(xSeed, ySeed, xSize, ySize);
+					//int xSeed, ySeed, xSize, ySize;
+					//sparseCluster->getClusterInfo(xSeed, ySeed, xSize, ySize);
 
-			        		// prepare a pulse for this cluster
-			        		std::auto_ptr<TrackerPulseImpl> zsPulse ( new TrackerPulseImpl );
-			        		idZSPulseEncoder["sensorID"]  = sensorID;
-			        		//idZSPulseEncoder["xSeed"]     = xSeed;
-			        		//idZSPulseEncoder["ySeed"]     = ySeed;
-			        		idZSPulseEncoder["type"]      = static_cast<int>(kEUTelAnnulusClusterImpl);//should be changed?
-			        		idZSPulseEncoder.setCellID( zsPulse.get() );
+					// prepare a pulse for this cluster
+					std::auto_ptr<TrackerPulseImpl> zsPulse ( new TrackerPulseImpl );
+					idZSPulseEncoder["sensorID"]  = sensorID;
+					//idZSPulseEncoder["xSeed"]     = xSeed;
+					//idZSPulseEncoder["ySeed"]     = ySeed;
+					idZSPulseEncoder["type"]      = static_cast<int>(kEUTelAnnulusClusterImpl);//should be changed?
+					idZSPulseEncoder.setCellID( zsPulse.get() );
 
-			        		zsPulse->setCharge( sparseCluster->getTotalCharge() );
-			        		//zsPulse->setQuality( static_cast<int > (sparseCluster->getClusterQuality()) );
-			        		zsPulse->setTrackerData( zsCluster.release() );
-			        		pulseCollection->push_back( zsPulse.release() );
+					zsPulse->setCharge( sparseCluster->getTotalCharge() );
+					//zsPulse->setQuality( static_cast<int > (sparseCluster->getClusterQuality()) );
+					zsPulse->setTrackerData( zsCluster.release() );
+					pulseCollection->push_back( zsPulse.release() );
 
-			        		// last but not least increment the totClusterMap
-			        		_totClusterMap[ sensorID ] += 1;
-                                                ncluster++;
-			        	} //cluster processing if
+					// last but not least increment the totClusterMap
+					_totClusterMap[ sensorID ] += 1;
+                                        ncluster++;
+				} //cluster processing if
 
-			        	else 
-			        	{
-			        		//in the case the cluster candidate is not passing the threshold ...
-			        		//forget about them, the memory should be automatically cleaned by std::auto_ptr's
-			        	}
-			        } //loop over all found clusters
+				else 
+				{
+					//in the case the cluster candidate is not passing the threshold ...
+					//forget about them, the memory should be automatically cleaned by std::auto_ptr's
+				}
+			} //loop over all found clusters
 
-              //   streamlog_out(MESSAGE5)<<"event = "<<evt->getEventNumber()<< " have ncluster " <<ncluster<<" on sensoer ID = "<<sensorID<<std::endl;
+                        //   streamlog_out(MESSAGE5)<<"event = "<<evt->getEventNumber()<< " have ncluster " <<ncluster<<" on sensoer ID = "<<sensorID<<std::endl;
 
 			delete genericPixel;
     		}	 
@@ -650,13 +651,21 @@ void EUTelProcessorAnnulusClustering::fillHistos (LCEvent * evt)
 
 			// get the cluster size in X and Y separately and plot it:
 			int xPos, yPos, xSize, ySize;
-			cluster->getClusterInfo(xPos, yPos, xSize, ySize); //the xPos and yPos is the position in the index space; xSize and ySize is the size  also in the index space
+
+                        /**the xPos and yPos is the position in the index space; xSize and ySize is the size  also in the index space*/
+			cluster->getClusterInfo(xPos, yPos, xSize, ySize);
 			float geoPosR, geoPosPhi, geoPosX, geoPosY, geoSizeR, geoSizePhi;
-                        float Fxpos=geo::gGeometry()._R0para.Fx;
-                        float Fypos=geo::gGeometry()._R0para.Fy;   
-			cluster->getClusterGeomInfo(Fxpos, Fypos, geoPosX, geoPosY, geoPosR, geoPosPhi, geoSizeR, geoSizePhi); // the geoPosX and geoPosY is the r and phi in the polar coordinate, geoSizeX and geoSizeY are the size of r and phi in the polar coordinate 
-                        //streamlog_out(DEBUG2)<<"xPos, yPos, xSize, ySize = "<<xPos<<", "<<yPos<<", "<<xSize<<", "<<ySize<<std::endl;
-                        //streamlog_out(MESSAGE5)<<"geoPos, geoPos, geoSize, geoSize = "<<geoPosX<<", "<<geoPosY<<", "<<Fxpos<<", "<<Fypos<<std::endl;
+
+                        std::map<int, geo::EUTelAnnulusGear>::iterator mapIt = geo::gGeometry()._AnnulusGearMap.find(detectorID );
+                        if( mapIt != geo::gGeometry()._AnnulusGearMap.end() ) {
+                             geo::EUTelAnnulusGear para = mapIt->second;
+                             float Fxpos=para.Fx ;
+                             float Fypos=para.Fy ;
+                             /**the geoPosX and geoPosY is the r and phi in the polar coordinate, geoSizeX and geoSizeY are the size of r and phi in the polar coordinate*/
+			     cluster->getClusterGeomInfo(Fxpos, Fypos, geoPosX, geoPosY, geoPosR, geoPosPhi, geoSizeR, geoSizePhi); 
+                        } else {
+                             throw(lcio::Exception( "Please check the sensorID!"));
+                        } 
 			//Do all the plots
 			(dynamic_cast<AIDA::IHistogram1D*> (_clusterSizeXHistos[detectorID]))->fill(xSize);
 			(dynamic_cast<AIDA::IHistogram1D*> (_clusterSizeYHistos[detectorID]))->fill(ySize);

@@ -79,20 +79,20 @@ struct EUTelPlane
 	double xRes, yRes;
 };
 
-//added by xiaocong
- struct EUTelR0
+ struct EUTelAnnulusGear
  {
  
-     double pitchPhi1, pitchPhi2;
+     double pitchPhi;
  
      double stereoAngle;
  
-     double rmin, r1, r2, r3, rmax;
- 
+     double rmin, rmax;
+    
+     double order;
+
      double rCentre;
  
      double Fx, Fy;
-   //  double radLength; 
  };
  
 
@@ -182,15 +182,15 @@ class EUTelGeometryTelescopeGeoDescription
 
 
      
-       bool _isR0GeoInitialized;
+       bool _isAnnulusGearInitialized;
 
   public:
 	/** Retrieves the instanstance of geometry.
 	 * Performs lazy intialization if necessary.
 	 * @TODO this routine has to be considered to be constant
 	 */
-        //added by xiaocong
-        EUTelR0 _R0para;
+        /**the map of planeID and annulus shape parameters*/
+        std::map< int , EUTelAnnulusGear > _AnnulusGearMap; 
 
  	static EUTelGeometryTelescopeGeoDescription& getInstance( gear::GearMgr* _g );
 
@@ -437,8 +437,7 @@ private:
 	std::map<int, TVector3> _planeXMap;
 	std::map<int, TVector3> _planeYMap;
 	std::map<int, double> _planeRadMap;
-        //added by xai
-        void readR0Geo();
+        void readAnnulusGear();
 
 };  
         

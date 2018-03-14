@@ -253,6 +253,10 @@ namespace eutelescope {
      */
 
     float getDistLocal(std::vector<EUTelHit>::iterator itHit, std::vector<float>& pos);
+
+    //Return the phi angle distance between hit position and prediction for radial strips. 
+    float getRadialDistLocal(std::vector<EUTelHit>::iterator itHit, std::vector<float>& pos);
+
     //! Will run the pattern recognition in alignment mode  
     /*! 
      *  @return tracks Tracks ready for use create using strict cuts for alignment. 

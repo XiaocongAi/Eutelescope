@@ -55,7 +55,7 @@ EUTelGeometryTelescopeGeoDescription& EUTelGeometryTelescopeGeoDescription::getI
 	if( i < 1 ) {
 		instance.setGearManager(_g);
                 instance.readGear();
-		instance.readR0Geo();
+		instance.readAnnulusGear();
 	}
 	instance.counter();
 	return instance;
@@ -275,24 +275,22 @@ void EUTelGeometryTelescopeGeoDescription::readTrackerPlanesLayout() {
 }
 
 
- void EUTelGeometryTelescopeGeoDescription::readR0Geo( ){
+ void EUTelGeometryTelescopeGeoDescription::readAnnulusGear( ){
  
-         if(_isR0GeoInitialized){
+         if(_isAnnulusGearInitialized){
  
-           streamlog_out(WARNING)<<"R0 geometry parameters already initialized!"<<std::endl;
+           streamlog_out(WARNING)<<"Annulus strip sensor geometry parameters already initialized!"<<std::endl;
  
          }
          else{
  
-              std::string filename("R0GeoFile.inp");
+              std::string filename("AnnulusGearFile.inp");
               std::ifstream infile(filename.c_str());
  
               if( infile.bad() ){
                   streamlog_out( ERROR4 ) << "Error opening the " << filename << std::endl;
               } else {
  
-                  EUTelR0 R0para;
-                  //std::vector<std::string> tokens;
                   std::stringstream tokenizer;
                   std::string line;
  
@@ -304,33 +302,42 @@ void EUTelGeometryTelescopeGeoDescription::readTrackerPlanesLayout() {
                        unsigned int numpars = 0;
                        std::getline( infile, line );
  
+                       EUTelAnnulusGear para;
+                       int sensorID;
+                       bool find_sensor=0;          
+             
+
                        if(line.empty()) {
                                continue;
                        }
  
                        tokenizer.clear();
                        tokenizer.str( line );
- 
- 
-                       tokenizer >> buffer >> dummy >> value;
-                      //std::cout<< ">>>>>"<< buffer << dummy << value<<std::endl;
- 
-                       if(buffer.compare("pitchPhi1") == 0 ) R0para.pitchPhi1 = value;
-                       if(buffer.compare("pitchPhi2") == 0 ) R0para.pitchPhi2 = value;
-                       if(buffer.compare("stereoAngle") == 0 ) R0para.stereoAngle = value;
-                       if(buffer.compare("rmin") == 0 ) R0para.rmin = value;
-                       if(buffer.compare("r1") == 0 ) R0para.r1 = value;
-                       if(buffer.compare("r2") == 0 ) R0para.r2 = value;
-                       if(buffer.compare("r3") == 0 ) R0para.r3 = value;
-                       if(buffer.compare("rmax") == 0 ) R0para.rmax = value;
-                       if(buffer.compare("rCentre") == 0 ) R0para.rCentre = value;
-                       if(buffer.compare("Fx") == 0 ) R0para.Fx = value;
-                       if(buffer.compare("Fy") == 0 ) R0para.Fy = value;
- 
+
+                         
+                       for(int i=0;i<9;i++) {
+                          tokenizer >> buffer >> dummy >> value;
+                          if(buffer.compare("sensorID") == 0 ) {
+                             sensorID=value; 
+                             find_sensor=1;
+                          }
+                           
+                          if(find_sensor){
+                             if(buffer.compare("pitchPhi") == 0 ) para.pitchPhi = value; 
+                             if(buffer.compare("stereoAngle") == 0 ) para.stereoAngle=value; 
+                             if(buffer.compare("rmin") == 0 ) para.rmin= value; 
+                             if(buffer.compare("rmax") == 0 ) para.rmax = value; 
+                             if(buffer.compare("order") == 0 ) para.order = value; 
+                             if(buffer.compare("rCentre") == 0 ) para.rCentre = value; 
+                             if(buffer.compare("Fx") == 0 ) para.Fx = value; 
+                             if(buffer.compare("Fy") == 0 ) para.Fy = value; 
+                          }
+                       }
+                       
+                       if(find_sensor)  _AnnulusGearMap.insert ( std::make_pair( sensorID, para) );     
                    }
  
-                  _R0para = R0para;
-                  _isR0GeoInitialized =true;
+                  _isAnnulusGearInitialized =true;
  
            }
        }
@@ -351,7 +358,7 @@ _trackerPlanesLayerLayout(nullptr),
 _sensorIDVec(),
 _nPlanes(0),
 _isGeoInitialized(false),
-_isR0GeoInitialized(false),
+_isAnnulusGearInitialized(false),
 _geoManager(nullptr)
 {
 	//Set ROOTs verbosity to only display error messages or higher (so info will not be streamed to stderr)
@@ -543,25 +550,13 @@ void EUTelGeometryTelescopeGeoDescription::translateSiPlane2TGeo(TGeoVolume* pvo
 	std::string name = geoLibName(SensorId);
 
 	if( name == "CAST" ) {
-            double pitchPhi1 = _R0para.pitchPhi1;
-            double pitchPhi2 = _R0para.pitchPhi2;
-            double stereoAngle = _R0para.stereoAngle;
-            double rmin = _R0para.rmin;
-            double r1 = _R0para.r1;
-            double r2 = _R0para.r2;
-            double r3 = _R0para.r3;
-            double rmax = _R0para.rmax;
-            double rCentre = _R0para.rCentre;
- 
-                  //if(SensorId ==15 || SensorId ==11 || SensorId == 19 || SensorId == 23)  _pixGeoMgr->addCastedAnnulusPlane( SensorId, siPlaneXNpixels(SensorId), siPlaneYNpixels(SensorId), siPlaneXSize(SensorId), siPlaneYSize(SensorId), siPlaneZSize(SensorId), pitchPhi1, stereoAngle, rmin, r1, rCentre,  siPlaneRadLength(SensorId), stVolName);  
-                 // else if(SensorId ==16 || SensorId ==12 || SensorId == 20 || SensorId == 24)  _pixGeoMgr->addCastedAnnulusPlane( SensorId, siPlaneXNpixels(SensorId), siPlaneYNpixels(SensorId), siPlaneXSize(SensorId), siPlaneYSize(SensorId), siPlaneZSize(SensorId), pitchPhi1, stereoAngle, r1, r2, rCentre,      siPlaneRadLength(SensorId), stVolName);  
-                 // else if(SensorId ==14 || SensorId ==10 || SensorId == 18 || SensorId == 22)  _pixGeoMgr->addCastedAnnulusPlane( SensorId, siPlaneXNpixels(SensorId), siPlaneYNpixels(SensorId), siPlaneXSize(SensorId), siPlaneYSize(SensorId), siPlaneZSize(SensorId), pitchPhi2, stereoAngle, r2, r3, rCentre,      siPlaneRadLength(SensorId), stVolName);  
-                 // else if(SensorId ==17 || SensorId ==13 || SensorId == 21 || SensorId == 25)  _pixGeoMgr->addCastedAnnulusPlane( SensorId, siPlaneXNpixels(SensorId), siPlaneYNpixels(SensorId), siPlaneXSize(SensorId), siPlaneYSize(SensorId), siPlaneZSize(SensorId), pitchPhi2, stereoAngle, r3, rmax, rCentre, siPlaneRadLength(SensorId), stVolName);
-                  if(SensorId ==11 || SensorId ==13 || SensorId == 15 || SensorId == 23)  _pixGeoMgr->addCastedAnnulusPlane( SensorId, siPlaneXNpixels(SensorId), siPlaneYNpixels(SensorId), siPlaneXSize(SensorId), siPlaneYSize(SensorId), siPlaneZSize(SensorId), pitchPhi1, stereoAngle, rmin, r1, rCentre,  siPlaneRadLength(SensorId), stVolName);  
-                  else if(SensorId ==10 || SensorId ==12 || SensorId == 14 || SensorId == 22)  _pixGeoMgr->addCastedAnnulusPlane( SensorId, siPlaneXNpixels(SensorId), siPlaneYNpixels(SensorId), siPlaneXSize(SensorId), siPlaneYSize(SensorId), siPlaneZSize(SensorId), pitchPhi1, stereoAngle, r1, r2, rCentre,      siPlaneRadLength(SensorId), stVolName);  
-                  else if(SensorId ==16 || SensorId ==18 || SensorId == 20 || SensorId == 24)  _pixGeoMgr->addCastedAnnulusPlane( SensorId, siPlaneXNpixels(SensorId), siPlaneYNpixels(SensorId), siPlaneXSize(SensorId), siPlaneYSize(SensorId), siPlaneZSize(SensorId), pitchPhi2, stereoAngle, r2, r3, rCentre,      siPlaneRadLength(SensorId), stVolName);  
-                  else if(SensorId ==17 || SensorId ==19 || SensorId == 21 || SensorId == 25)  _pixGeoMgr->addCastedAnnulusPlane( SensorId, siPlaneXNpixels(SensorId), siPlaneYNpixels(SensorId), siPlaneXSize(SensorId), siPlaneYSize(SensorId), siPlaneZSize(SensorId), pitchPhi2, stereoAngle, r3, rmax, rCentre, siPlaneRadLength(SensorId), stVolName);
-                  else _pixGeoMgr->addCastedPlane( SensorId, siPlaneXNpixels(SensorId), siPlaneYNpixels(SensorId), siPlaneXSize(SensorId), siPlaneYSize(SensorId), siPlaneZSize(SensorId), siPlaneRadLength(SensorId), stVolName);
+     
+           EUTelAnnulusGear para; 
+           std::map<int, EUTelAnnulusGear>::iterator mapIt = _AnnulusGearMap.find(SensorId);
+           if( mapIt != _AnnulusGearMap.end() ) {
+              para  = mapIt->second;
+              _pixGeoMgr->addCastedAnnulusPlane( SensorId, siPlaneXNpixels(SensorId), siPlaneYNpixels(SensorId), siPlaneXSize(SensorId), siPlaneYSize(SensorId), siPlaneZSize(SensorId), para.pitchPhi, para.stereoAngle, para.rmin, para.rmax, para.rCentre, para.order, siPlaneRadLength(SensorId), stVolName);  
+           }  else _pixGeoMgr->addCastedPlane( SensorId, siPlaneXNpixels(SensorId), siPlaneYNpixels(SensorId), siPlaneXSize(SensorId), siPlaneYSize(SensorId), siPlaneZSize(SensorId), siPlaneRadLength(SensorId), stVolName);
 
 	} else {
 		_pixGeoMgr->addPlane( SensorId, name, stVolName);
