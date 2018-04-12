@@ -1,0 +1,12 @@
+sensorID = 11   pitchPhi = 0.0001932745   rmin = 384.5  rmax = 403.518  stereoAngle = 0.02  rCentre = 438.614  Fx = 8.77169519303  Fy = -438.526280124052050  order = 1
+sensorID = 13   pitchPhi = 0.0001932745   rmin = 384.5  rmax = 403.518  stereoAngle = 0.02  rCentre = 438.614  Fx = 8.77169519303  Fy = -438.526280124052050  order = 1
+sensorID = 15   pitchPhi = 0.0001932745   rmin = 384.5  rmax = 403.518  stereoAngle = 0.02  rCentre = 438.614  Fx = 8.77169519303  Fy = -438.526280124052050  order = 1
+sensorID = 10   pitchPhi = 0.0001932745   rmin = 403.518  rmax = 427.516  stereoAngle = 0.02  rCentre = 438.614  Fx = 8.77169519303  Fy = -438.526280124052050  order = 1
+sensorID = 12   pitchPhi = 0.0001932745   rmin = 403.518  rmax = 427.516  stereoAngle = 0.02  rCentre = 438.614  Fx = 8.77169519303  Fy = -438.526280124052050  order = 1
+sensorID = 14   pitchPhi = 0.0001932745   rmin = 403.518  rmax = 427.516  stereoAngle = 0.02  rCentre = 438.614  Fx = 8.77169519303  Fy = -438.526280124052050  order = 1
+sensorID = 16   pitchPhi = 0.0001718368   rmin = 427.516  rmax = 456.510  stereoAngle = 0.02  rCentre = 438.614  Fx = 8.77169519303  Fy = -438.526280124052050  order = -1
+sensorID = 18   pitchPhi = 0.0001718368   rmin = 427.516  rmax = 456.510  stereoAngle = 0.02  rCentre = 438.614  Fx = 8.77169519303  Fy = -438.526280124052050  order = -1
+sensorID = 20   pitchPhi = 0.0001718368   rmin = 427.516  rmax = 456.510  stereoAngle = 0.02  rCentre = 438.614  Fx = 8.77169519303  Fy = -438.526280124052050  order = -1
+sensorID = 17   pitchPhi = 0.0001718368   rmin = 456.510  rmax = 488.422  stereoAngle = 0.02  rCentre = 438.614  Fx = 8.77169519303  Fy = -438.526280124052050  order = -1
+sensorID = 19   pitchPhi = 0.0001718368   rmin = 456.510  rmax = 488.422  stereoAngle = 0.02  rCentre = 438.614  Fx = 8.77169519303  Fy = -438.526280124052050  order = -1
+sensorID = 21   pitchPhi = 0.0001718368   rmin = 456.510  rmax = 488.422  stereoAngle = 0.02  rCentre = 438.614  Fx = 8.77169519303  Fy = -438.526280124052050  order = -1
