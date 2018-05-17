@@ -246,7 +246,7 @@ EUTelClusteringProcessor::EUTelClusteringProcessor ()
 #endif
 
     registerProcessorParameter("HistogramFilling","Switch on or off the histogram filling",
-                               _fillHistos, static_cast< bool > ( true ) );
+                               _fillHistos, static_cast< bool > ( false ) );
 
     registerOptionalParameter("ExcludedPlanes", "The list of sensor ids that have to be excluded from the clustering.",
                               _ExcludedPlanes, std::vector<int> () );
@@ -264,8 +264,7 @@ void EUTelClusteringProcessor::init() {
     // the _ffXClusterSize and the _ffYClusterSize are odd numbers
     if (
         _nzsClusteringAlgo == EUTELESCOPE::FIXEDFRAME  || _zsClusteringAlgo == EUTELESCOPE::FIXEDFRAME
-        ||
-        _nzsClusteringAlgo == EUTELESCOPE::DFIXEDFRAME  || _nzsClusteringAlgo == EUTELESCOPE::DFIXEDFRAME
+        || _nzsClusteringAlgo == EUTELESCOPE::DFIXEDFRAME 
         ) {
         bool isZero = ( _ffXClusterSize <= 0 );
         bool isEven = ( _ffXClusterSize % 2 == 0 );
@@ -371,9 +370,11 @@ void EUTelClusteringProcessor::initializeGeometry( LCEvent * event ) throw ( mar
     _ancillaryIndexMap.clear();
     _orderedSensorIDVec.clear();
 
+
     try {
         // this is the exemplary ancillary collection
-        LCCollectionVec * noiseCollectionVec = dynamic_cast< LCCollectionVec * > ( event->getCollection( _noiseCollectionName ) );
+        //LCCollectionVec * noiseCollectionVec = dynamic_cast< LCCollectionVec * > ( event->getCollection( _noiseCollectionName ) );
+        LCCollectionVec * noiseCollectionVec = dynamic_cast< LCCollectionVec * > ( event->getCollection( _zsDataCollectionName ) );  //just to know the sensorIDs
 
         // prepare also a cell decoder
         CellIDDecoder< TrackerDataImpl > noiseDecoder( noiseCollectionVec );
@@ -407,11 +408,11 @@ void EUTelClusteringProcessor::modifyEvent( LCEvent * /* event */ )
 
 void EUTelClusteringProcessor::initializeHotPixelMapVec(  )
 {
-    streamlog_out(DEBUG4) << "initializeHotPixelMapVec, hotPixelCollectionVec size = " << hotPixelCollectionVec->size() << endl;
+    streamlog_out(DEBUG1) << "initializeHotPixelMapVec, hotPixelCollectionVec size = " << hotPixelCollectionVec->size() << endl;
 
     // prepare some decoders
     CellIDDecoder<TrackerDataImpl> cellDecoder( hotPixelCollectionVec );
-    CellIDDecoder<TrackerDataImpl> noiseDecoder( noiseCollectionVec );
+ //   CellIDDecoder<TrackerDataImpl> noiseDecoder( noiseCollectionVec );
 
     for ( unsigned int iDetector = 0 ; iDetector < hotPixelCollectionVec->size(); iDetector++ )
     {
@@ -439,14 +440,21 @@ void EUTelClusteringProcessor::initializeHotPixelMapVec(  )
             continue;
         }
 
+/*
         // the noise map. we only need this map for decoding issues.
         TrackerDataImpl    *noise  = 0;
 
         // the noise map. we only need this map for decoding issues.
         noise  = dynamic_cast<TrackerDataImpl*>   (noiseCollectionVec->getElementAt( _ancillaryIndexMap[ sensorID ] ));
-
+        
         // prepare the matrix decoder
         EUTelMatrixDecoder matrixDecoder( noiseDecoder , noise );
+*/
+      
+        //gear::SiPlanesParameters* siPlanesParameters  = const_cast< gear::SiPlanesParameters*  > ( &(Global::GEAR->getSiPlanesParameters()));
+        //gear::SiPlanesLayerLayout* siPlanesLayerLayout = const_cast< gear::SiPlanesLayerLayout* > ( &(siPlanesParameters->getSiPlanesLayerLayout() ));
+        //EUTelMatrixDecoder matrixDecoder( siPlanesLayerLayout , sensorID );
+        EUTelMatrixDecoder matrixDecoder(48, 16, 0, 0 );
 
         // now prepare the EUTelescope interface to sparsified data.
         auto_ptr<EUTelTrackerDataInterfacerImpl<EUTelGenericSparsePixel > >  sparseData(new EUTelTrackerDataInterfacerImpl<EUTelGenericSparsePixel> ( hotData ));
@@ -462,6 +470,11 @@ void EUTelClusteringProcessor::initializeHotPixelMapVec(  )
             sparseData->getSparsePixelAt( iPixel, sparsePixel );
             int decoded_XY_index = matrixDecoder.getIndexFromXY( sparsePixel->getXCoord(), sparsePixel->getYCoord() ); // unique pixel index !!
 
+                std::cout <<
+                " iPixel " << iPixel <<
+                " idet " << iDetector <<
+                " decoded_XY_index " << decoded_XY_index << endl;
+            
             streamlog_out ( DEBUG1 )   <<
                 " iPixel " << iPixel <<
                 " idet " << iDetector <<
@@ -608,6 +621,7 @@ void EUTelClusteringProcessor::readCollections (LCEvent * event)
         streamlog_out ( DEBUG4 ) << "No status collection found in the event" << endl;
     }
 
+/*
     noiseCollectionVec = 0;
     try
     {
@@ -618,11 +632,14 @@ void EUTelClusteringProcessor::readCollections (LCEvent * event)
     {
         streamlog_out ( DEBUG4 ) << "No noise pixel DB collection found in the event" << endl;
     }
+*/
 
     // the hotpixel db file should be read only once, and
     // only after the statusCollection has been created (opened)
     //
-    if( isFirstEvent() && statusCollectionVec != 0 )
+    
+    //if( isFirstEvent() && statusCollectionVec != 0 )
+    if( isFirstEvent() )
     {
         hotPixelCollectionVec = 0;
         try
@@ -637,6 +654,7 @@ void EUTelClusteringProcessor::readCollections (LCEvent * event)
         }
 
     }
+    
 
     // in the current event it is possible to have either full frame and
     // zs data. Here is the right place to guess what we have
@@ -756,6 +774,7 @@ void EUTelClusteringProcessor::processEvent (LCEvent * event)
         // the bricked clustering type is solely needed for TAKI sensors type
         else if ( _zsClusteringAlgo == EUTELESCOPE::BRICKEDCLUSTER ) zsBrickedClustering(evt, pulseCollection); // force 3x3 clusters
     }
+
 
     // if the pulseCollection is not empty add it to the event
     if ( ! pulseCollectionExists && ( pulseCollection->size() != _initialPulseCollectionSize ))
@@ -1979,8 +1998,7 @@ void EUTelClusteringProcessor::zsBrickedClustering(LCEvent * evt, LCCollectionVe
 void EUTelClusteringProcessor::sparseClustering(LCEvent* evt, LCCollectionVec* pulseCollection)
 {
     //only for noise
-    CellIDDecoder<TrackerDataImpl> noiseDecoder( noiseCollectionVec );
-
+    //CellIDDecoder<TrackerDataImpl> noiseDecoder( noiseCollectionVec );
 
 
     // prepare some decoders
@@ -2117,9 +2135,12 @@ void EUTelClusteringProcessor::sparseClustering(LCEvent* evt, LCCollectionVec* p
                 }
 
                 // get the noise matrix with the right detectorID
-                TrackerDataImpl* noise  = dynamic_cast<TrackerDataImpl*>   (noiseCollectionVec->getElementAt( _ancillaryIndexMap[ sensorID ] ));
+                //TrackerDataImpl* noise  = dynamic_cast<TrackerDataImpl*>   (noiseCollectionVec->getElementAt( _ancillaryIndexMap[ sensorID ] ));
                 // prepare the matrix decoder
-                EUTelMatrixDecoder matrixDecoder( noiseDecoder , noise );
+                //EUTelMatrixDecoder matrixDecoder( noiseDecoder , noise );
+                
+                EUTelMatrixDecoder matrixDecoder(48, 16, 0, 0 ); 
+                
                 // prepare a vector to store the noise values
                 vector<float> noiseValueVec;
 
@@ -2137,12 +2158,13 @@ void EUTelClusteringProcessor::sparseClustering(LCEvent* evt, LCCollectionVec* p
                     else
                     {
                         sparseCluster->addSparsePixel( &pixel );
-                        noiseValueVec.push_back(noise->getChargeValues()[ index ]);
+                        //noiseValueVec.push_back(noise->getChargeValues()[ index ]);
+                        noiseValueVec.push_back(30);
                     }
                 }
 
                 sparseCluster->setNoiseValues( noiseValueVec );
-
+                
                 //Now we need to process the found cluster
                 if ( (sparseCluster->size() > 0) && (sparseCluster->getSeedSNR() >= _sparseSeedCut) && (sparseCluster->getClusterSNR() >= _sparseClusterCut) )
                 {
@@ -2894,7 +2916,6 @@ void EUTelClusteringProcessor::resetStatus(IMPL::TrackerRawDataImpl * status) {
 void EUTelClusteringProcessor::fillHistos (LCEvent * evt) {
 
 
-
     EUTelEventImpl * eutelEvent = static_cast<EUTelEventImpl*> (evt);
     EventType type              = eutelEvent->getEventType();
 
@@ -2915,9 +2936,9 @@ void EUTelClusteringProcessor::fillHistos (LCEvent * evt) {
         CellIDDecoder<TrackerPulseImpl > cellDecoder(pulseCollectionVec);
 
         // I also need the noise collection too fill in the SNR histograms
-        LCCollectionVec * noiseCollectionVec    = dynamic_cast < LCCollectionVec * > (evt->getCollection(_noiseCollectionName));
-        LCCollectionVec * statusCollectionVec   = dynamic_cast < LCCollectionVec * > (evt->getCollection(_statusCollectionName));
-        CellIDDecoder<TrackerDataImpl > noiseDecoder(noiseCollectionVec);
+        //LCCollectionVec * noiseCollectionVec    = dynamic_cast < LCCollectionVec * > (evt->getCollection(_noiseCollectionName));
+        //LCCollectionVec * statusCollectionVec   = dynamic_cast < LCCollectionVec * > (evt->getCollection(_statusCollectionName));
+        //CellIDDecoder<TrackerDataImpl > noiseDecoder(noiseCollectionVec);
 
         vector<unsigned short> eventCounterVec( _noOfDetector, 0 );
 
@@ -2967,6 +2988,7 @@ void EUTelClusteringProcessor::fillHistos (LCEvent * evt) {
             }
             if(foundexcludedsensor)
                 continue;
+            
             // increment of one unit the event counter for this plane
             eventCounterVec[ _ancillaryIndexMap[ detectorID] ]++;
 
@@ -3005,11 +3027,12 @@ void EUTelClusteringProcessor::fillHistos (LCEvent * evt) {
 
             // get the noise TrackerDataImpl corresponding to the detector
             // under analysis and the status matrix as well
-            TrackerDataImpl    * noiseMatrix  = dynamic_cast<TrackerDataImpl *>    (noiseCollectionVec->getElementAt(  _ancillaryIndexMap[ detectorID ]) );
-            TrackerRawDataImpl * statusMatrix = dynamic_cast<TrackerRawDataImpl *> (statusCollectionVec->getElementAt( _ancillaryIndexMap[ detectorID ]) );
+            //TrackerDataImpl    * noiseMatrix  = dynamic_cast<TrackerDataImpl *>    (noiseCollectionVec->getElementAt(  _ancillaryIndexMap[ detectorID ]) );
+            //TrackerRawDataImpl * statusMatrix = dynamic_cast<TrackerRawDataImpl *> (statusCollectionVec->getElementAt( _ancillaryIndexMap[ detectorID ]) );
 
             // prepare also a MatrixDecoder for this matrix
-            EUTelMatrixDecoder noiseMatrixDecoder(noiseDecoder, noiseMatrix);
+            //EUTelMatrixDecoder noiseMatrixDecoder(noiseDecoder, noiseMatrix);
+            EUTelMatrixDecoder noiseMatrixDecoder(48, 16, 0, 0 ); 
             int minX, minY, maxX, maxY;
             minX = 0;
             minY = 0;
@@ -3026,11 +3049,15 @@ void EUTelClusteringProcessor::fillHistos (LCEvent * evt) {
                              ( yPixel >= minY )  &&  ( yPixel <= maxY ) ) {
                             int index = noiseMatrixDecoder.getIndexFromXY(xPixel, yPixel);
                             // the corresponding position in the status matrix has to be HITPIXEL
-                            bool isHit      = ( statusMatrix->getADCValues()[index] == EUTELESCOPE::HITPIXEL );
-                            bool isBad      = ( statusMatrix->getADCValues()[index] == EUTELESCOPE::BADPIXEL );
-                            bool isMissing  = ( statusMatrix->getADCValues()[index] == EUTELESCOPE::MISSINGPIXEL );
+                            //bool isHit      = ( statusMatrix->getADCValues()[index] == EUTELESCOPE::HITPIXEL );
+                            //bool isBad      = ( statusMatrix->getADCValues()[index] == EUTELESCOPE::BADPIXEL );
+                            //bool isMissing  = ( statusMatrix->getADCValues()[index] == EUTELESCOPE::MISSINGPIXEL );
+                            bool isHit      = true;
+                            bool isBad      = false;
+                            bool isMissing  = false;
                             if ( !isMissing && !isBad && isHit ) {
-                                noiseValues.push_back( noiseMatrix->getChargeValues()[index] );
+                                //noiseValues.push_back( noiseMatrix->getChargeValues()[index] );
+                                noiseValues.push_back( 30 );
                             } else {
                                 noiseValues.push_back( 0. );
                             }
@@ -3049,7 +3076,8 @@ void EUTelClusteringProcessor::fillHistos (LCEvent * evt) {
                     for ( unsigned int iPixel = 0 ; iPixel < recasted->size() ; iPixel++ ) {
                         recasted->getSparsePixelAt( iPixel , pixel.get() );
                         int index = noiseMatrixDecoder.getIndexFromXY( pixel->getXCoord(), pixel->getYCoord() );
-                        noiseValues.push_back( noiseMatrix->getChargeValues() [ index ] );
+                        //noiseValues.push_back( noiseMatrix->getChargeValues() [ index ] );
+                        noiseValues.push_back( 30 );
 
                     }
                 }

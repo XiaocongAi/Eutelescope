@@ -551,12 +551,30 @@ void EUTelProcessorHitMaker::bookHistos(int sensorID) {
 	//Note in the local frame the origin is at the centre of the sensor. So we want this to look for hits in the -x/y direction, as well at the + axis.
 	//We add and subtract a constant so we know for sure we can see all hits on the histogram.
 	double constant=5;
+ 
+
   double xMin =  -(geo::gGeometry().siPlaneXSize ( sensorID )/2)-constant;
   double xMax = ( geo::gGeometry().siPlaneXSize ( sensorID )/2)+constant;   
 
   double yMin = -(geo::gGeometry().siPlaneYSize ( sensorID )/2)-constant;
   double yMax = (geo::gGeometry().siPlaneYSize ( sensorID )/2)+constant; 
 
+/*
+  if(sensorID!=10){
+   xMin =  -1.0;
+   xMax = 1;
+
+   yMin = 0;
+   yMax = 2;
+  }
+  else{
+   xMin =  -1.0;
+   xMax = 1;
+
+   yMin = 0;
+   yMax = 2;
+  }
+*/
   int xNBin =    2*geo::gGeometry().siPlaneXNpixels ( sensorID );
   int yNBin =    2*geo::gGeometry().siPlaneYNpixels ( sensorID );
 
