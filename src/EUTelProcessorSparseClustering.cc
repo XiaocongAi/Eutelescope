@@ -114,8 +114,7 @@ EUTelProcessorSparseClustering::EUTelProcessorSparseClustering():
   registerProcessorParameter("SparseMinDistanceSquared","Minimum distance squared between sparsified pixel ( touching == 2) ",
                              _sparseMinDistanceSquared, static_cast<int>(2) );
   
-
-  		_isFirstEvent = true;
+		_isFirstEvent = true;
 }
 
 void EUTelProcessorSparseClustering::init() {
@@ -233,7 +232,7 @@ void EUTelProcessorSparseClustering::processEvent (LCEvent * event)
 	}
 	else if ( evt->getEventType() == kUNKNOWN ) 
 	{
-		streamlog_out ( WARNING2 ) << "Event number " << evt->getEventNumber() << " is of unknown type. Continue considering it as a normal Data Event." << std::endl;
+//		streamlog_out ( WARNING2 ) << "Event number " << evt->getEventNumber() << " is of unknown type. Continue considering it as a normal Data Event." << std::endl;
 	}
 
 	// prepare a pulse collection to add all clusters found this can be either a new collection or already existing in the event

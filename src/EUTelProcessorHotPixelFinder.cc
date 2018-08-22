@@ -365,8 +365,8 @@ void EUTelProcessorHotPixelFinder::processEvent (LCEvent * event)
     }
     else if ( evt->getEventType() == kUNKNOWN ) 
     {
-        streamlog_out ( WARNING2 ) << "Event number " << event->getEventNumber()
-            << " is of unknown type. Continue considering it as a normal Data Event." << endl;
+      //  streamlog_out ( WARNING2 ) << "Event number " << event->getEventNumber()
+      //      << " is of unknown type. Continue considering it as a normal Data Event." << endl;
     }
 
     try 

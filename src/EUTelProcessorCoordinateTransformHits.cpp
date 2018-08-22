@@ -85,8 +85,8 @@ void EUTelProcessorCoordinateTransformHits::processEvent(LCEvent* event)
 		} 
 		else if( evt->getEventType() == kUNKNOWN )
 		{
-				streamlog_out( WARNING2 ) << "Event number " << evt->getEventNumber() << " in run " << evt->getRunNumber()
-						<< " is of unknown type. Continue considering it as a normal Data Event." << std::endl;
+//				streamlog_out( WARNING2 ) << "Event number " << evt->getEventNumber() << " in run " << evt->getRunNumber()
+//						<< " is of unknown type. Continue considering it as a normal Data Event." << std::endl;
 		}
 
 		//Opens collection for input.

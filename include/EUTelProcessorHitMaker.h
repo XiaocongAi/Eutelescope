@@ -339,6 +339,14 @@ namespace eutelescope {
     //! Coordinates reference frame switch
     bool _wantLocalCoordinates;
     FloatVec _localDistDUT;
+  
+    //! select the hit on the first M26 which in the jadepix region
+    FloatVec _cutRegionX0;
+    FloatVec _cutRegionY0;
+
+    //! select the hit on the other M26s which in the jadepix region
+    FloatVec _cutRegionX;
+    FloatVec _cutRegionY;
 
     //! Reference Hit file 
     std::string _referenceHitLCIOFile;

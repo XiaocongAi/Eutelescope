@@ -300,7 +300,7 @@ void EUTelProcessorNoisyPixelFinder::processEvent (LCEvent * event)
     }
     else if ( evt->getEventType() == kUNKNOWN ) 
     {
-        streamlog_out ( WARNING2 ) << "Event number " << event->getEventNumber() << " is of unknown type. Continue considering it as a normal Data Event." << std::endl;
+       // streamlog_out ( WARNING2 ) << "Event number " << event->getEventNumber() << " is of unknown type. Continue considering it as a normal Data Event." << std::endl;
     }
 
 	//if we don't skip the event, we pass it to HotPixelFinder() which does all the work

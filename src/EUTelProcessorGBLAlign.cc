@@ -153,7 +153,7 @@ void EUTelProcessorGBLAlign::processEvent(LCEvent * evt){
 				streamlog_out(DEBUG4) << "EORE found: nothing else to do." << std::endl;
 				return;
 			}else if (event->getEventType() == kUNKNOWN) {
-				streamlog_out(WARNING2) << "Event number " << event->getEventNumber() << " in run " << event->getRunNumber() << " is of unknown type. Continue considering it as a normal Data Event." << std::endl;
+//				streamlog_out(WARNING2) << "Event number " << event->getEventNumber() << " in run " << event->getRunNumber() << " is of unknown type. Continue considering it as a normal Data Event." << std::endl;
 			}
             EUTelReaderGenericLCIO reader = EUTelReaderGenericLCIO();
             std::vector<EUTelTrack> tracks = reader.getTracks(evt, _trackCandidatesInputCollectionName);

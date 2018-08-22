@@ -119,9 +119,9 @@ namespace eutelescope {
     for ( unsigned int index = 0; index < size() ; index++ ) {
       getSparsePixelAt( index, pixel );
       tempX         += pixel->getSignal() * ( pixel->getXCoord() - xSeed );
-      tempY         += pixel->getSignal() * ( pixel->getYCoord() - ySeed );
+      tempY         += pixel->getSignal() * ( pixel->getYCoord() - ySeed );          
       normalization += pixel->getSignal() ;
-//      printf(" getCoG %5d %5d %5.1f \n",  pixel->getXCoord(), pixel->getYCoord(), normalization);
+      //printf(" getCoG %5d %5d %5.1f  %5.1f \n",  pixel->getXCoord(), pixel->getYCoord(), pixel->getSignal(), normalization);
     }
     if ( normalization != 0 ) {
       xCoG = tempX / normalization;

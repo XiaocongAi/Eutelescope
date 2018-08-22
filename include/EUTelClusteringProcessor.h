@@ -760,6 +760,9 @@ namespace eutelescope {
      */
     int _noOfDetector;
 
+    /*number of found clusters on jadepix*/
+    std::map< int, int > _nGoodCluster;
+
     //! List of excluded planes.
     /*! This vector contains a list of sensor ids for planes that have
      *   to be excluded from the clustering.
@@ -788,6 +791,9 @@ namespace eutelescope {
 
     //! Map for pointer to Cluster signal histogram (size along Y).
     std::map<int,AIDA::IBaseHistogram*> _clusterSizeYHistos;
+    
+    //! Map for pointer to Cluster number histogram.
+    std::map<int,AIDA::IBaseHistogram*> _clusterNumHistos;
 
      //! Map for pointer to Seed pixel signal histo
     std::map<int,AIDA::IBaseHistogram*> _seedSignalHistos;

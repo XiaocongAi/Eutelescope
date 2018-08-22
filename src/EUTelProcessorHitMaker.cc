@@ -88,7 +88,11 @@ _alreadyBookedSensorID(),
 _aidaHistoMap(),
 _histogramSwitch(true),
 _orderedSensorIDVec(),
-_localDistDUT(0,0)
+_localDistDUT(0,0),
+_cutRegionX(-30,30),
+_cutRegionY(-30,30),
+_cutRegionX0(-30,30),
+_cutRegionY0(-30,30)
 {
   // modify processor description
   _description =  "EUTelProcessorHitMaker is responsible to translate cluster centers from the local frame of reference \nto the external frame of reference using the GEAR geometry description";
@@ -103,6 +107,19 @@ _localDistDUT(0,0)
   registerOptionalParameter("ReferenceCollection","This is the name of the reference hit collection initialized in this processor. This collection provides the reference vector to correctly determine a plane corresponding to a global hit coordiante.", _referenceHitCollectionName, static_cast<string>("referenceHit") );
  
   registerOptionalParameter("ReferenceHitFile","This is the file where the reference hit collection is stored", _referenceHitLCIOFile, std::string("reference.slcio") );
+  
+  registerOptionalParameter("cutRegionX0","select the hit reigon on the first M26 in X direction",
+                             _cutRegionX0, FloatVec());
+
+  registerOptionalParameter("cutRegionY0","select the hit reigon on the first M26 in Y direction",
+                             _cutRegionY0, FloatVec());
+
+  registerOptionalParameter("cutRegionX","select the hit reigon on M26 (1-5) in X direction",
+                             _cutRegionX, FloatVec());
+
+  registerOptionalParameter("cutRegionY","select the hit reigon on M26 (1-5) in Y direction",
+                             _cutRegionY, FloatVec());
+
 }
 
 
@@ -242,8 +259,8 @@ void EUTelProcessorHitMaker::processEvent (LCEvent * event) {
       streamlog_out ( DEBUG4 ) << "EORE found: nothing else to do. Inside EUTelProcessorHitMaker::processEvent, line 240" << endl;
       return;
     } else if ( evt->getEventType() == kUNKNOWN ) {
-      streamlog_out ( WARNING2 ) << "Event number " << evt->getEventNumber() << " in run " << evt->getRunNumber()
-                               << " is of unknown type. Continue considering it as a normal Data Event." << endl;
+     // streamlog_out ( WARNING2 ) << "Event number " << evt->getEventNumber() << " in run " << evt->getRunNumber()
+     //                          << " is of unknown type. Continue considering it as a normal Data Event." << endl;
     }
     
     LCCollectionVec * pulseCollection   = 0;
@@ -281,6 +298,7 @@ void EUTelProcessorHitMaker::processEvent (LCEvent * event) {
     double xSize = 0., ySize = 0.;
     double resolutionX = 0., resolutionY = 0.;
     double xPitch = 0., yPitch = 0.;
+    int nhit =0;
 
 	for( int iCluster = 0; iCluster < pulseCollection->getNumberOfElements(); iCluster++ ) 
 	{
@@ -331,7 +349,7 @@ void EUTelProcessorHitMaker::processEvent (LCEvent * event) {
 				if(pixelType == kEUTelGenericSparsePixel)
 				{
 					EUTelGenericSparseClusterImpl<EUTelGenericSparsePixel> cluster (trackerData);
-					cluster.getCenterOfGravity(xPos, yPos);
+				   	cluster.getCenterOfGravity(xPos, yPos);
 
 					//For non geometric clusters, getCenterOfGravity will return it in pixel indices space, i.e.
 					//we still have to transform into mm via the dimensions
@@ -403,10 +421,13 @@ void EUTelProcessorHitMaker::processEvent (LCEvent * event) {
 					double yDet = ( static_cast<double> (yCluSeed) + yCorrection + 0.5 ) * yPitch ;
 
 					// check the hack from Havard:
-					float xCoG(0.0f), yCoG(0.0f);
+				       // if(sensorID!=51 && sensorID!=52){ 
+                                  	float xCoG(0.0f), yCoG(0.0f);
 					cluster->getCenterOfGravity(xCoG, yCoG);
 					xDet = (xCoG + 0.5) * xPitch;
 					yDet = (yCoG + 0.5) * yPitch; 
+                                       // }
+
 
 					streamlog_out(DEBUG1) << "cluster[" << setw(4) << iCluster << "] on sensor[" << setw(3) << sensorID 
 							<< "] at [" << setw(8) << setprecision(3) << xCoG << ":" << setw(8) << setprecision(3) << yCoG << "]"
@@ -416,12 +437,10 @@ void EUTelProcessorHitMaker::processEvent (LCEvent * event) {
 					//We have calculated the cluster hit position in terms of distance along the X and Y axis.
 					//However we still fo not have the sensor centre as the origin of the coordinate system.
 					//To do this we need to deduct xSize/2 and ySize/2 for the respective cluster X/Y position 
-                    if(_localDistDUT.empty()){
-                        _localDistDUT.push_back(0);
-                        _localDistDUT.push_back(1);
-
-                    }
-
+                                        if(_localDistDUT.empty()){
+                                            _localDistDUT.push_back(0);
+                                            _localDistDUT.push_back(1);
+                                        }
 
 					telPos[0] = xDet - xSize/2. +_localDistDUT.at(0);
 					telPos[1] = yDet - ySize/2. +_localDistDUT.at(1); 
@@ -488,6 +507,7 @@ void EUTelProcessorHitMaker::processEvent (LCEvent * event) {
 			TrackerHitImpl* hit = new TrackerHitImpl;
 
 			hit->setPosition( &telPos[0] );
+                    
 			float cov[TRKHITNCOVMATRIX] = {0.,0.,0.,0.,0.,0.};
 			double resx = resolutionX;
 			double resy = resolutionY;
@@ -516,8 +536,25 @@ void EUTelProcessorHitMaker::processEvent (LCEvent * event) {
 			idHitEncoder.setCellID( hit );
 
 			// add the new hit to the hit collection
-			hitCollection->push_back( hit );
+			//hitCollection->push_back( hit );
+                        
+                        if(sensorID==0){
+                          if(telPos[0]>_cutRegionX0.at(0) && telPos[0]<_cutRegionX0.at(1) && telPos[1]>_cutRegionY0.at(0) && telPos[1]<_cutRegionY0.at(1) ) 
+		       	  hitCollection->push_back( hit );
+                          nhit++;
+                        }
+                        else if(sensorID>0 && sensorID<6){
+                          if(telPos[0]>_cutRegionX.at(0) && telPos[0]<_cutRegionX.at(1) && telPos[1]>_cutRegionY.at(0) && telPos[1]<_cutRegionY.at(1) )
+                          hitCollection->push_back( hit );
+                          nhit++;
+                        }
+                        else{
+		          hitCollection->push_back( hit );
+                          nhit++;
+                        }
+                        
 	}
+        //std::cout<<"nhit = "<<nhit<<std::endl;
 
     try
     { 
@@ -559,22 +596,15 @@ void EUTelProcessorHitMaker::bookHistos(int sensorID) {
   double yMin = -(geo::gGeometry().siPlaneYSize ( sensorID )/2)-constant;
   double yMax = (geo::gGeometry().siPlaneYSize ( sensorID )/2)+constant; 
 
-/*
-  if(sensorID!=10){
+
+  if(sensorID>5){
    xMin =  -1.0;
    xMax = 1;
 
-   yMin = 0;
-   yMax = 2;
+   yMin = 0.5;
+   yMax = 1.5;
   }
-  else{
-   xMin =  -1.0;
-   xMax = 1;
 
-   yMin = 0;
-   yMax = 2;
-  }
-*/
   int xNBin =    2*geo::gGeometry().siPlaneXNpixels ( sensorID );
   int yNBin =    2*geo::gGeometry().siPlaneYNpixels ( sensorID );
 
@@ -593,7 +623,7 @@ void EUTelProcessorHitMaker::bookHistos(int sensorID) {
   // 2 should be enough because it
   // means that the sensor is wrong
   // by all its size.
-  double safetyFactor = 1.2;
+  double safetyFactor = 2;
   double xPosition =  geo::gGeometry().siPlaneXPosition( sensorID );
   double yPosition =  geo::gGeometry().siPlaneYPosition( sensorID );
   double xSize     =  geo::gGeometry().siPlaneXSize ( sensorID );
@@ -601,14 +631,14 @@ void EUTelProcessorHitMaker::bookHistos(int sensorID) {
   int xBin         =  2*geo::gGeometry().siPlaneXNpixels( sensorID );
   int yBin         =  2*geo::gGeometry().siPlaneYNpixels( sensorID );
 
-  xMin = -20;  // safetyFactor * ( xPosition - ( 0.5 * xSize ));
-  xMax = 20; // safetyFactor * ( xPosition + ( 0.5 * xSize ));
+  xMin =  -20; //safetyFactor * ( xPosition - ( 0.5 * xSize ));
+  xMax =  20; //safetyFactor * ( xPosition + ( 0.5 * xSize ));
 
-  yMin = -20; // safetyFactor * ( yPosition - ( 0.5 * ySize ));
-  yMax = 20; // safetyFactor * ( yPosition + ( 0.5 * ySize ));
+  yMin = -20;// safetyFactor * ( yPosition - ( 0.5 * ySize ));
+  yMax = 20;// safetyFactor * ( yPosition + ( 0.5 * ySize ));
 
-  xNBin = static_cast< int > ( safetyFactor  * xBin );
-  yNBin = static_cast< int > ( safetyFactor  * yBin );
+  xNBin = 4000;//static_cast< int > ( safetyFactor  * xBin );
+  yNBin = 4000;//static_cast< int > ( safetyFactor  * yBin );
 
   tempHistoName =  _hitHistoTelescopeName + "_" + to_string( sensorID );
   AIDA::IHistogram2D * hitHistoTelescope =
