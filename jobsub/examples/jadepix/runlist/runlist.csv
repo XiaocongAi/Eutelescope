@@ -1,13 +1,4 @@
 RunNumber,BeamEnergy,Threshold,GearGeoFile
-#R0H0,Bottom Edge
-000001,5.6,40,gear_before_run1.xml 
-#000001,5.6,40,alignedGear-iter2-run000001-APIX-try1.xml 
-
-000002,5.6,40,gear_before_run2.xml 
-#000002,5.6,40,alignedGear-iter2-run000002-APIX-try1.xml 
-
-000004,5.6,40,gear_before_run1.xml 
-
 
 000022,5.6,40,gear_before.xml 
 

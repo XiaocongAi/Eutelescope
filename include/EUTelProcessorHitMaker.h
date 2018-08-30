@@ -340,13 +340,15 @@ namespace eutelescope {
     bool _wantLocalCoordinates;
     FloatVec _localDistDUT;
   
-    //! select the hit on the first M26 which in the jadepix region
-    FloatVec _cutRegionX0;
-    FloatVec _cutRegionY0;
+    //! vector of hit selection cuts in X (upper limit)
+    std::vector< float  > _cutRegionXMax;
+    //! vector of hit selection cuts in X (lower limit) 
+    std::vector< float  > _cutRegionXMin;
+    //! vector of hit selection cuts in Y (upper limit)       
+    std::vector< float  > _cutRegionYMax;
+    //! vector of hit selection cuts in Y (lower limit) 
+    std::vector< float  > _cutRegionYMin;
 
-    //! select the hit on the other M26s which in the jadepix region
-    FloatVec _cutRegionX;
-    FloatVec _cutRegionY;
 
     //! Reference Hit file 
     std::string _referenceHitLCIOFile;

@@ -88,11 +88,7 @@ _alreadyBookedSensorID(),
 _aidaHistoMap(),
 _histogramSwitch(true),
 _orderedSensorIDVec(),
-_localDistDUT(0,0),
-_cutRegionX(-30,30),
-_cutRegionY(-30,30),
-_cutRegionX0(-30,30),
-_cutRegionY0(-30,30)
+_localDistDUT(0,0)
 {
   // modify processor description
   _description =  "EUTelProcessorHitMaker is responsible to translate cluster centers from the local frame of reference \nto the external frame of reference using the GEAR geometry description";
@@ -108,17 +104,17 @@ _cutRegionY0(-30,30)
  
   registerOptionalParameter("ReferenceHitFile","This is the file where the reference hit collection is stored", _referenceHitLCIOFile, std::string("reference.slcio") );
   
-  registerOptionalParameter("cutRegionX0","select the hit reigon on the first M26 in X direction",
-                             _cutRegionX0, FloatVec());
+  registerOptionalParameter("cutRegionXMin","The lower limit of the local coordinate in X direction to select hit on M26",
+                             _cutRegionXMin, std::vector<float > (6, -10.) );
 
-  registerOptionalParameter("cutRegionY0","select the hit reigon on the first M26 in Y direction",
-                             _cutRegionY0, FloatVec());
+  registerOptionalParameter("cutRegionXMax","The upper limit of the local coordinate in X direction to select hit on M26",
+                             _cutRegionXMax, std::vector<float > (6, 10.) );
 
-  registerOptionalParameter("cutRegionX","select the hit reigon on M26 (1-5) in X direction",
-                             _cutRegionX, FloatVec());
+  registerOptionalParameter("cutRegionYMin","The lower limit of the local coordinate in Y direction to select hit on M26",
+                             _cutRegionYMin, std::vector<float > (6, -10.) );
 
-  registerOptionalParameter("cutRegionY","select the hit reigon on M26 (1-5) in Y direction",
-                             _cutRegionY, FloatVec());
+  registerOptionalParameter("cutRegionYMax","The lower limit of the local coordinate in Y direction to select hit on M26",
+                             _cutRegionYMax, std::vector<float > (6, 10.) );
 
 }
 
@@ -174,8 +170,8 @@ void EUTelProcessorHitMaker::DumpReferenceHitDB()
   double refVec[3] ;
 
   EVENT::IntVec sensorIDVec = geo::gGeometry().sensorIDsVec();
-  
-  for(EVENT::IntVec::iterator it = sensorIDVec.begin(); it != sensorIDVec.end(); it++)
+ 
+  for(EVENT::IntVec::iterator it = sensorIDVec.begin(); it !=  sensorIDVec.end(); it++)
   {
     EUTelReferenceHit* refhit = new EUTelReferenceHit();
 
@@ -475,7 +471,7 @@ void EUTelProcessorHitMaker::processEvent (LCEvent * event) {
 					// NOW !!
 					// GLOBAL coordinate system !!!
 
-                    const double localPos[3] = { telPos[0], telPos[1], telPos[2] };
+                                        const double localPos[3] = { telPos[0], telPos[1], telPos[2] };
 
 					geo::gGeometry().local2Master( sensorID, localPos, telPos);
 
@@ -488,9 +484,9 @@ void EUTelProcessorHitMaker::processEvent (LCEvent * event) {
 					AIDA::IHistogram2D * histo2D = dynamic_cast<AIDA::IHistogram2D*> (_aidaHistoMap[ tempHistoName ] );
 					if ( histo2D )
 					{
-                            const double localPos[3] = { telPos[0] , telPos[1], telPos[2] };
-                            double gloPos[3];
-                            geo::gGeometry().local2Master( sensorID, localPos, gloPos);
+                                                        const double localPos[3] = { telPos[0] , telPos[1], telPos[2] };
+                                                        double gloPos[3];
+                                                        geo::gGeometry().local2Master( sensorID, localPos, gloPos);
 							histo2D->fill( gloPos[0], gloPos[1] );
 					}
 					else 
@@ -537,24 +533,28 @@ void EUTelProcessorHitMaker::processEvent (LCEvent * event) {
 
 			// add the new hit to the hit collection
 			//hitCollection->push_back( hit );
-                        
-                        if(sensorID==0){
-                          if(telPos[0]>_cutRegionX0.at(0) && telPos[0]<_cutRegionX0.at(1) && telPos[1]>_cutRegionY0.at(0) && telPos[1]<_cutRegionY0.at(1) ) 
-		       	  hitCollection->push_back( hit );
-                          nhit++;
-                        }
-                        else if(sensorID>0 && sensorID<6){
-                          if(telPos[0]>_cutRegionX.at(0) && telPos[0]<_cutRegionX.at(1) && telPos[1]>_cutRegionY.at(0) && telPos[1]<_cutRegionY.at(1) )
-                          hitCollection->push_back( hit );
-                          nhit++;
+                       
+                        if(sensorID<6){   
+                        	double cutXMin = _cutRegionXMin[ sensorID ];
+                      		double cutXMax = _cutRegionXMax[ sensorID ];
+                  	     	double cutYMin = _cutRegionYMin[ sensorID ];
+                       		double cutYMax = _cutRegionYMax[ sensorID ];
+  
+                                streamlog_out( DEBUG2 ) << "selectio region " << cutXMin << " " << cutXMax << " " << cutYMin <<" "<<cutYMax<<std:: endl;
+                          
+                                if(telPos[0]>cutXMin && telPos[0]<cutXMax && telPos[1]>cutYMin && telPos[1]<cutYMax ){ 
+		                	hitCollection->push_back( hit );
+                                        nhit+=1;
+                                }
                         }
                         else{
-		          hitCollection->push_back( hit );
-                          nhit++;
+                                streamlog_out( DEBUG2 ) << "no cut on DUT"<<std:: endl;
+		        	hitCollection->push_back( hit );
+                                nhit+=1;
                         }
                         
 	}
-        //std::cout<<"nhit = "<<nhit<<std::endl;
+        //if(nhit == 0) std::cout<<"nhit = "<<nhit<<std::endl;
 
     try
     { 
@@ -562,6 +562,7 @@ void EUTelProcessorHitMaker::processEvent (LCEvent * event) {
     }
     catch(...)
     {
+      if(nhit>0) 
       event->addCollection( hitCollection, _hitCollectionName );
     }
 

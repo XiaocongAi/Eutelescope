@@ -763,6 +763,10 @@ namespace eutelescope {
     /*number of found clusters on jadepix*/
     std::map< int, int > _nGoodCluster;
 
+    /*Remove the pixes in the sensor edge by setting limit 
+    on the pixel index:(xlow, xup, ylow, yup)*/    
+    std::vector<int > _cutPixel;
+    
     //! List of excluded planes.
     /*! This vector contains a list of sensor ids for planes that have
      *   to be excluded from the clustering.

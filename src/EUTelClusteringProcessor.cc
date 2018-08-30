@@ -224,6 +224,9 @@ EUTelClusteringProcessor::EUTelClusteringProcessor ()
     registerOptionalParameter("HotPixelCollectionName","This is the name of the hotpixel collection",
                               _hotPixelCollectionName, static_cast< string > ( "hotpixel_m26" ) );
 
+    registerOptionalParameter("cutPixel","Remove the pixes in the sensor edge by setting limit on the pixel index:(xlow, xup, ylow, yup)",
+                             _cutPixel, std::vector<int > () );
+
 
 #if defined(USE_AIDA) || defined(MARLIN_USE_AIDA)
     IntVec clusterNxNExample;
@@ -2158,7 +2161,7 @@ void EUTelClusteringProcessor::sparseClustering(LCEvent* evt, LCCollectionVec* p
 
                     int index = matrixDecoder.getIndexFromXY( pixel.getXCoord(), pixel.getYCoord() );
                     //if( _hitIndexMapVec[idetector].find( index ) != _hitIndexMapVec[idetector].end() )
-                    if( _hitIndexMapVec[idetector].find( index ) != _hitIndexMapVec[idetector].end() || pixel.getXCoord()==0 || pixel.getXCoord()==1|| pixel.getYCoord() == 15 ||pixel.getYCoord() == 14 )
+                    if( _hitIndexMapVec[idetector].find( index ) != _hitIndexMapVec[idetector].end() || pixel.getXCoord()<_cutPixel.at(0) || pixel.getXCoord()>_cutPixel.at(1) || pixel.getYCoord() <_cutPixel.at(2) ||pixel.getYCoord() > _cutPixel.at(3) )
                     {
                         // do nothing
                     }
@@ -2489,6 +2492,9 @@ void EUTelClusteringProcessor::fixedFrameClustering(LCEvent * evt, LCCollectionV
                                                        << " on detector " << sensorID
                                                        << " contains more than " << MAXCLUSTERSIZE << " cluster (" << clusterCounter + limitExceed << ")" << endl;
                         }
+                        delete eutelCluster;
+                        delete pulse;
+                        delete cluster;
                     } else {
                         // the cluster has not passed the cut!
 
