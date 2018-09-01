@@ -435,7 +435,7 @@ void EUTelProcessorHitMaker::processEvent (LCEvent * event) {
 					//To do this we need to deduct xSize/2 and ySize/2 for the respective cluster X/Y position 
                                         if(_localDistDUT.empty()){
                                             _localDistDUT.push_back(0);
-                                            _localDistDUT.push_back(1);
+                                            _localDistDUT.push_back(0);
                                         }
 
 					telPos[0] = xDet - xSize/2. +_localDistDUT.at(0);
@@ -599,15 +599,15 @@ void EUTelProcessorHitMaker::bookHistos(int sensorID) {
 
 
   if(sensorID>5){
-   xMin =  -1.0;
-   xMax = 1;
+   xMin =  -2.;
+   xMax = 2;
 
-   yMin = 0.5;
-   yMax = 1.5;
+   yMin = -1;
+   yMax = 1;
   }
 
-  int xNBin =    2*geo::gGeometry().siPlaneXNpixels ( sensorID );
-  int yNBin =    2*geo::gGeometry().siPlaneYNpixels ( sensorID );
+  int xNBin = (xMax - xMin)/0.01;//    2*geo::gGeometry().siPlaneXNpixels ( sensorID );
+  int yNBin = (yMax - yMin)/0.01;//   2*geo::gGeometry().siPlaneYNpixels ( sensorID );
 
 
   AIDA::IHistogram2D * hitHistoLocal = AIDAProcessor::histogramFactory(this)->createHistogram2D( (basePath + tempHistoName).c_str(),

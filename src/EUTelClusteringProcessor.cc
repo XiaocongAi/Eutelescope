@@ -454,10 +454,11 @@ void EUTelClusteringProcessor::initializeHotPixelMapVec(  )
         EUTelMatrixDecoder matrixDecoder( noiseDecoder , noise );
 */
       
-        //gear::SiPlanesParameters* siPlanesParameters  = const_cast< gear::SiPlanesParameters*  > ( &(Global::GEAR->getSiPlanesParameters()));
-        //gear::SiPlanesLayerLayout* siPlanesLayerLayout = const_cast< gear::SiPlanesLayerLayout* > ( &(siPlanesParameters->getSiPlanesLayerLayout() ));
-        //EUTelMatrixDecoder matrixDecoder( siPlanesLayerLayout , sensorID );
-        EUTelMatrixDecoder matrixDecoder(48, 16, 0, 0 ); //hard-coded sensor pixel size here!!!
+        int minX, minY, maxX, maxY;
+        minX = 0;
+        minY = 0;
+        getMaxPixels(sensorID, maxX, maxY);
+        EUTelMatrixDecoder matrixDecoder(maxX, maxY, 0, 0 ); 
 
         // now prepare the EUTelescope interface to sparsified data.
         auto_ptr<EUTelTrackerDataInterfacerImpl<EUTelGenericSparsePixel > >  sparseData(new EUTelTrackerDataInterfacerImpl<EUTelGenericSparsePixel> ( hotData ));
@@ -1399,11 +1400,11 @@ void EUTelClusteringProcessor::zsFixedFrameClustering(LCEvent * evt, LCCollectio
 
         // prepare the matrix decoder
         //EUTelMatrixDecoder matrixDecoder( noiseDecoder , noise );
-        EUTelMatrixDecoder matrixDecoder( 48 , 16 );
+        EUTelMatrixDecoder matrixDecoder( maxX , maxY );
 
         // prepare a data vector mimicking the TrackerData data of the
         // standard FixedFrameClustering. Initialize all the entries to zero.
-        vector<float > dataVec( 48*16, 0. );
+        vector<float > dataVec( maxX*maxY, 0. );
 
         // prepare a multimap for the seed candidates
         multimap<float , int > seedCandidateMap;
@@ -2148,7 +2149,11 @@ void EUTelClusteringProcessor::sparseClustering(LCEvent* evt, LCCollectionVec* p
                 //TrackerDataImpl* noise  = dynamic_cast<TrackerDataImpl*>   (noiseCollectionVec->getElementAt( _ancillaryIndexMap[ sensorID ] ));
                 // prepare the matrix decoder
                 //EUTelMatrixDecoder matrixDecoder( noiseDecoder , noise );
-                EUTelMatrixDecoder matrixDecoder(48, 16, 0, 0 ); //hardcoded here 
+                int minX, minY, maxX, maxY;
+                minX = 0;
+                minY = 0;
+                getMaxPixels(sensorID, maxX, maxY);
+                EUTelMatrixDecoder matrixDecoder(maxX, maxY, minX, minY ); 
                 
                 // prepare a vector to store the noise values
                 vector<float> noiseValueVec;
@@ -2332,7 +2337,7 @@ void EUTelClusteringProcessor::fixedFrameClustering(LCEvent * evt, LCCollectionV
 
         // prepare the matrix decoder
         //EUTelMatrixDecoder matrixDecoder(cellDecoder, nzsData);
-        EUTelMatrixDecoder matrixDecoder(48, 16);
+        EUTelMatrixDecoder matrixDecoder(maxX, maxY);
 
         // reset the status
         //resetStatus(status);
@@ -3061,14 +3066,16 @@ void EUTelClusteringProcessor::fillHistos (LCEvent * evt) {
 
             // prepare also a MatrixDecoder for this matrix
             //EUTelMatrixDecoder noiseMatrixDecoder(noiseDecoder, noiseMatrix);
-            EUTelMatrixDecoder noiseMatrixDecoder(48, 16, 0, 0 ); 
-            int minX, minY, maxX, maxY;
-            minX = 0;
-            minY = 0;
+            
+           // now that we know which is the sensorID, we can ask to GEAR
+           // which are the minX, minY, maxX and maxY.
+           int minX, minY, maxX, maxY;
+           minX = 0;
+           minY = 0;
+           getMaxPixels(detectorID, maxX, maxY);
+           EUTelMatrixDecoder noiseMatrixDecoder(maxX, maxY, 0, 0 ); 
 
-            getMaxPixels(detectorID, maxX, maxY);
-
-            vector<float > noiseValues;
+           vector<float > noiseValues;
             //! not sure if this is 100% correct for bricked clusters here
             if ( type == kEUTelFFClusterImpl || type == kEUTelBrickedClusterImpl ) {
                 for ( int yPixel = ySeed - ( _ffYClusterSize / 2 ); yPixel <= ySeed + ( _ffYClusterSize / 2 ); yPixel++ ) {
