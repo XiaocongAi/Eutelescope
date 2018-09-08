@@ -63,10 +63,10 @@ to the external frame of reference using the GEAR geometry description-->
   <parameter name="ReferenceHitFile" type="string" value="@DatabasePath@/@FilePrefix@-refhit-db.slcio"/>
   <!--verbosity level of this processor ("DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT")-->
   <!--parameter name="Verbosity" type="string" value=""/-->
-  <parameter name="cutRegionX0" type="FloatVec"> @cutRegionX0@ </parameter>
-  <parameter name="cutRegionY0" type="FloatVec"> @cutRegionY0@ </parameter>
-  <parameter name="cutRegionX" type="FloatVec"> @cutRegionX@ </parameter>
-  <parameter name="cutRegionY" type="FloatVec"> @cutRegionY@ </parameter>
+  <parameter name="cutRegionXMin" type="FloatVec"> @cutRegionXMin@ </parameter>
+  <parameter name="cutRegionXMax" type="FloatVec"> @cutRegionXMax@ </parameter>
+  <parameter name="cutRegionYMin" type="FloatVec"> @cutRegionYMin@ </parameter>
+  <parameter name="cutRegionYMax" type="FloatVec"> @cutRegionYMax@ </parameter>
 </processor>
 
 
@@ -79,6 +79,8 @@ to the external frame of reference using the GEAR geometry description-->
   <parameter name="HitCollectionName" type="string" lcioOutType="TrackerHit"> local_hit </parameter>
   <!--Hit coordinates are calculated in local reference frame of sensor-->
   <parameter name="EnableLocalCoordidates" type="bool" value="true"/>
+  <!--Shift the coordinates of the hits on the local sensor frame-->
+  <parameter name="localDistDUT" type="FloatVec"> @localDistDUT@ </parameter>
   <!--This is the name of the reference hit collection initialized in this processor. This collection provides the reference vector to correctly determine a plane corresponding to a global hit coordiante.-->
   <!--parameter name="ReferenceCollection" type="string" value="referenceHit"/-->
   <!--This is the file where the reference hit collection is stored-->

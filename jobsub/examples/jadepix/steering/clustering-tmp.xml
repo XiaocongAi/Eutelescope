@@ -103,7 +103,7 @@
   <parameter name="HistogramFilling" type="bool" value="true"/>
   <!--Select here which algorithm should be used for clustering-->
   <!--parameter name="ClusteringAlgo" type="string" value="FixedFrame"/-->
-  <!--parameter name="ZSClusteringAlgo" type="string" value="FixedFrame"/>
+  <!--parameter name="ZSClusteringAlgo" type="string" value="FixedFrame"/-->
   <!--parameter name="FFSeedCut" type="float" value="200"/-->
   <!--parameter name="FFClusterCut" type="float" value="200"/-->
   <!--parameter name="FFClusterSizeX" type="int" value="3"/-->
@@ -115,6 +115,8 @@
   <!--parameter name="TCut" type="float" value="3.40282e+38"/-->
   <!--verbosity level of this processor ("DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT")-->
   <!--parameter name="Verbosity" type="string" value=""/-->
+  <!---select pixel index regions on sensor-->
+  <parameter name="cutPixel" type="IntVec" value="@cutPixel@"/>
 </processor>
 
 
