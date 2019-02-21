@@ -606,8 +606,8 @@ void EUTelProcessorHitMaker::bookHistos(int sensorID) {
    yMax = 1;
   }
 
-  int xNBin = (xMax - xMin)/0.01;//    2*geo::gGeometry().siPlaneXNpixels ( sensorID );
-  int yNBin = (yMax - yMin)/0.01;//   2*geo::gGeometry().siPlaneYNpixels ( sensorID );
+  int xNBin = (xMax - xMin)/0.06;//    2*geo::gGeometry().siPlaneXNpixels ( sensorID );
+  int yNBin = (yMax - yMin)/0.06;//   2*geo::gGeometry().siPlaneYNpixels ( sensorID );
 
 
   AIDA::IHistogram2D * hitHistoLocal = AIDAProcessor::histogramFactory(this)->createHistogram2D( (basePath + tempHistoName).c_str(),
