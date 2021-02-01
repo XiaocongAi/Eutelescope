@@ -37,7 +37,6 @@ LIST( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
 
 FIND_PACKAGE( Marlin 1.0 REQUIRED )
 FIND_PACKAGE( MarlinUtil 1.2 REQUIRED )
-FIND_PACKAGE( GSL )
 FIND_PACKAGE( AIDA )
 FIND_PACKAGE( ROOT COMPONENTS Minuit Geom )
 FIND_PACKAGE( LCCD  REQUIRED )               
@@ -67,7 +66,7 @@ INCLUDE_DIRECTORIES( SYSTEM ${EIGEN2_INCLUDE_DIR} )
 # General Broken Line track fitter as shared lib:
  FIND_PACKAGE( GBL )
 
-FOREACH( pkg Marlin MarlinUtil GSL AIDA ROOT LCCD GBL XERCESC G4 ALLPIX )
+FOREACH( pkg Marlin MarlinUtil AIDA ROOT LCCD GBL XERCESC G4 ALLPIX )
     IF( ${pkg}_FOUND )
         # include as "system" libraries: gcc will be less verbose w.r.t. warnings
         INCLUDE_DIRECTORIES(SYSTEM ${${pkg}_INCLUDE_DIRS} )
@@ -130,10 +129,6 @@ ENDIF()
 
 IF ( AIDA_FOUND)
   ADD_DEFINITIONS("-DUSE_AIDA")
-ENDIF()
-
-IF ( GSL_FOUND )
-  ADD_DEFINITIONS("-DUSE_GSL")
 ENDIF()
 
 # these are needed anyway...
